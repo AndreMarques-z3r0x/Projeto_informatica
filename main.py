@@ -1,6 +1,6 @@
 import mysql.connector
 from mysql.connector import errorcode
-#luca gay
+#ahahahah
 
 class DataBase:
     def __init__(self, filename):
@@ -115,7 +115,7 @@ class DataBase:
 
     def update_order_db(self, table, data):
         __columns = []
-        #cursor = self.mysqldb.cursor()
+        cursor = self.mysqldb.cursor()
         __query = "UPDATE " + table + " SET "
         try:
             for (name, value) in data.items():
@@ -139,6 +139,7 @@ class DataBase:
             print(__query)
 
 
+
 def main():
     db = DataBase("dbConfig.txt")
     q = db.request_stores_db()
@@ -157,11 +158,11 @@ def main():
     #ret = db.insert_order_db('transform', info)
     information = {
         'piece': 'P12',
-        'quantity': 86,
+        'quantity': 90,
     }
     #db.insert_order_db('stores', information)
     #orders = db.request_orders_db('transform')
-    db.update_order_db("transform", info)
+    db.update_order_db("transform", information)
 
 if __name__ == '__main__':
     main()
