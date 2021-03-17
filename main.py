@@ -1,6 +1,6 @@
 import mysql.connector
 from mysql.connector import errorcode
-
+#ahahaha
 
 class DataBase:
     def __init__(self, filename):
