@@ -155,7 +155,7 @@ def main():
         'quantity2': 0,
         'quantity3': 0,
     }
-    #ret = db.insert_order_db('transform', info)
+    ret = db.insert_order_db('transform', info)
     information = {
         'piece': 'P12',
         'quantity': 90,

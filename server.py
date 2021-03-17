@@ -1,7 +1,7 @@
 from socket import *
 import xml.etree.ElementTree as ET
 import time
-
+from main import DataBase
 lista_ordens_pendentes=[]
 lista_descargas_pendentes=[]
 
