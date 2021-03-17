@@ -170,6 +170,7 @@ class Ui_ERP(object):
         self.menuestatisticas.setTitle(_translate("ERP", "estatisticas"))
 
     def metodos(self):
+        self.p=['','P1','P2','P3','P4','P5','P6','P7','P8','P9']
         self.id=0
         self.HOST='localhost'
         self.PORT=54321
@@ -180,17 +181,17 @@ class Ui_ERP(object):
         self.prordens.clicked.connect(lambda: self.send_req_orders())
 
     def send_order(self):
-        msg='<Order Number="{}"><Transform From="{}" To="{}" Quantity="{}" Time="{}" MaxDelay="{}" Penalty="{}"/></Order>'.format(self.id,self.sfrom.value(),self.sto.value(),self.squantity1.value(),int(time.time()),self.smaxdelay.value(),self.spenalty.value())
+        msg='<Order Number="{}"><Transform From="{}" To="{}" Quantity="{}" Time="{}" MaxDelay="{}" Penalty="{}"/></Order>'.format(self.id,self.p[self.sfrom.value()],self.p[self.sto.value()],self.squantity1.value(),int(time.time()),self.smaxdelay.value(),self.spenalty.value())
         self.id=self.id+1
         self.clt.sendto(msg.encode('utf-8'),(self.HOST,self.PORT))
-        text='id={} \nfrom={} \nTo={} \nQuantity={} \nMaxDelay={}\npenalty={}'.format(self.id,self.sfrom.value(),self.sto.value(),self.squantity1.value(),self.smaxdelay.value(),self.spenalty.value())
+        text='id={} \nfrom={} \nTo={} \nQuantity={} \nMaxDelay={}\npenalty={}'.format(self.id,self.p[self.sfrom.value()],self.p[self.sto.value()],self.squantity1.value(),self.smaxdelay.value(),self.spenalty.value())
         self.lmsgordem.setText(text)
         self.lmsgordem.adjustSize()
 
     def send_descarga(self):
-        msg='<Order Number="{}"><Unload Type="{}" Destination="{}" Quantity="{}"/></Order>'.format(self.stype_2.value(),self.stype.value(),self.sdestination.value(),self.squantity2.value())
+        msg='<Order Number="{}"><Unload Type="{}" Destination="{}" Quantity="{}"/></Order>'.format(self.stype_2.value(),self.p[self.stype.value()],self.p[self.sdestination.value()],self.squantity2.value())
         self.clt.sendto(msg.encode('utf-8'),(self.HOST,self.PORT))
-        text='id={} \nType={} \nDestination={} \nQuantity={}'.format(self.stype_2.value(),self.stype.value(),self.sdestination.value(),self.squantity2.value())
+        text='id={} \nType={} \nDestination={} \nQuantity={}'.format(self.stype_2.value(),self.p[self.stype.value()],self.p[self.sdestination.value()],self.squantity2.value())
         self.lmsgdescarga.setText(text)
         self.lmsgdescarga.adjustSize()
 

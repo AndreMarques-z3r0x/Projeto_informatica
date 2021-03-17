@@ -4,26 +4,27 @@ import time
 from main import DataBase
 lista_ordens_pendentes=[]
 lista_descargas_pendentes=[]
-
+db = DataBase("dbConfig.txt")
 def request_stores_db():
     return [1, 2, 3, 4, 5, 6, 7, 8, 9]
 def request_orders_db():
     dic=[0,0,0]
     for i in range(3):
-        dic[i]= {"Number": i,
-                "From": i,
-                "To":i,
-                "Quantity":i,
-                "Quantity1":i,
-                "Quantity2":i,
-                "MaxDelay":i,
-                "TT":i,
-                "T1":i,
-                "DD":i,
-                "PP":i,
-                "ST":i,
-                "ET":i,
-                "P1":i
+        dic[i]= {"nnn": i,
+                "from": i,
+                "to":i,
+                "quantity":i,
+                "quantity1":i,
+                "quantity2":i,
+                "quantity3":i,
+                "maxdelay":i,
+                "time":i,
+                "time1":i,
+                "max_delay":i,
+                "penalty":i,
+                "start":i,
+                "end":i,
+                "penaltyincurred":i
                 }
     return dic
 
@@ -75,7 +76,8 @@ class com_erp:
             msg=('{}'
             '<Order Number="{}">\n'
             '<Transform From="{}" To="{}" Quantity="{}" Quantity1="{}" Quantity2="{}" Quantity3="{}" Time="{}" Time1="{}" MaxDelay="{}" Penalty="{}" Start="{}" End="{}" PenaltyIncurred="{}"/>\n'
-            '</Order>\n').format(msg,l["Number"],l["From"],l["To"],l["Quantity"],l["Quantity1"],l["Quantity2"],l["MaxDelay"],l["TT"],l["T1"],l["DD"],l["PP"],l["ST"],l["ET"],l["P1"])
+            '</Order>\n').format(msg,l["nnn"],l["from"],l["to"],l["quantity"],l["quantity1"],\
+            l["quantity2"],l["quantity3"],l["time"],l["time1"],l["max_delay"],l["penalty"],l["start"],l["end"],l["penaltyincurred"])
         msg=msg + '</Order_Schedule>'
         self.send_msg_udp(msg,addr)
 
@@ -88,15 +90,20 @@ class ordem:
         self.time_mes=time.time()
         for info in mensagem.findall('Transform'):
             self.number=int(mensagem.attrib["Number"])
-            self.fro=int(info.attrib["From"])
-            self.to=int(info.attrib["To"])
+            self.fro=info.attrib["From"]
+            self.to=info.attrib["To"]
             self.quantity=int(info.attrib["Quantity"])
             self.time_erp=int(info.attrib["Time"])
             self.maxdelay=int(info.attrib["MaxDelay"])
             self.penalty=int(info.attrib["Penalty"])
-        self.quantity2=self.quantity
+        self.quantity2=0
+        self.quantity3=self.quantity
         self.actual_penalty=0
         self.print_info()
+        dic={"nnn":self.number,"from":self.fro,"to":self.to,"quantity":self.quantity,"quantity1":self.quantity1,"quantity2": self.quantity2,\
+        "quantity3":self.quantity3,"time":self.time_erp,"time1":self.time_mes,"max_delay":self.maxdelay,\
+        "penalty":self.penalty,"start":self.time_inicio,"end":self.time_fim,"penaltyincurred":self.actual_penalty}
+        db.insert_order_db('transform', dic)
         self.calc_penalty()
     def print_info(self):
         print('---------------------------------')
@@ -123,9 +130,12 @@ class descarga:
         self.estado=0
         for desc in mensagem.findall('Unload'):
             self.number=int(mensagem.attrib["Number"])
-            self.tipo=int(desc.attrib["Type"])
-            self.destino=int(desc.attrib["Destination"])
+            self.tipo=desc.attrib["Type"]
+            self.destino=desc.attrib["Destination"]
             self.quantity=int(desc.attrib["Quantity"])
+        dic={"nnn":self.number,"type":self.tipo,"destination":self.destino,"quantity":self.quantity}
+        db.insert_order_db('unload', dic)
+
         self.print_info()
     def print_info(self):
         print('number= ',self.number)
