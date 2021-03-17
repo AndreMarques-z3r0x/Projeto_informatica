@@ -63,6 +63,11 @@ class DataBase:
                     'quantity1': row[7],
                     'quantity2': row[8],
                     'quantity3': row[9],
+                    'time1': row[10],
+                    'start': row[11],
+                    'end': row[12],
+                    'penalty_incurred': row[13],
+                    'estado': row[14]
                 }
             except ValueError:
                 print("error while fetching data")
@@ -147,7 +152,7 @@ def main():
     db = DataBase("dbConfig.txt")
     q = db.request_stores_db()
     info = {
-        'nnn': 8,
+        'nnn': 10,
         'from': 'P2',
         'to': 'P3',
         'quantity': 69,
@@ -161,12 +166,14 @@ def main():
         'start': 0,
         'end': 0,
         'penalty_incurred': 0,
+        'estado': 0,
     }
     info2 = {
-        'nnn': 1,
+        'nnn': 2,
         'type': 'P1',
         'destination': 'P3',
         'quantity': 5,
+        'estado': 0,
     }
     ret = db.insert_order_db('transform', info)
     information = {
