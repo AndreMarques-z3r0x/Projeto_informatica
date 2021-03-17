@@ -1,0 +1,4 @@
+host:localhost
+user:andre
+password:andre199921
+database:informatica
