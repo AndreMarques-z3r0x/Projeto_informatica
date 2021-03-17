@@ -5,6 +5,7 @@ from main import DataBase
 lista_ordens_pendentes=[]
 lista_descargas_pendentes=[]
 db = DataBase("dbConfig.txt")
+db.clear_db_tables()
 def request_stores_db():
     return [1, 2, 3, 4, 5, 6, 7, 8, 9]
 def request_orders_db():
