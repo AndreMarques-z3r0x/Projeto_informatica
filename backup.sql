@@ -57,6 +57,10 @@ CREATE TABLE `transform` (
   `quantity1` int NOT NULL,
   `quantity2` int NOT NULL,
   `quantity3` int NOT NULL,
+  `time1` int NOT NULL,
+  `start` int NOT NULL,
+  `end` int NOT NULL,
+  `penalty_incurred` int NOT NULL,
   PRIMARY KEY (`nnn`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -67,7 +71,7 @@ CREATE TABLE `transform` (
 
 LOCK TABLES `transform` WRITE;
 /*!40000 ALTER TABLE `transform` DISABLE KEYS */;
-INSERT INTO `transform` VALUES (1,'P1','P2',30,1500,1500,0,0,0,0),(2,'P5','P6',15,0,224,0,0,0,0),(3,'P2','P7',55,0,117,0,0,0,0),(4,'P2','P3',69,0,6969,0,0,0,0),(5,'P2','P3',69,0,6969,0,0,0,0),(6,'P2','P3',69,0,6969,0,0,0,0),(7,'P2','P3',80,0,9999,0,0,0,0);
+INSERT INTO `transform` VALUES (1,'P1','P2',30,1500,1500,0,0,0,0,0,0,0,0),(2,'P5','P6',15,0,224,0,0,0,0,0,0,0,0),(3,'P2','P7',55,0,117,0,0,0,0,0,0,0,0),(4,'P2','P3',69,0,6969,0,0,0,0,0,0,0,0),(5,'P2','P3',69,0,6969,0,0,0,0,0,0,0,0),(6,'P2','P3',69,0,6969,0,0,0,0,0,0,0,0),(7,'P2','P3',80,0,9999,0,0,0,0,0,0,0,0);
 /*!40000 ALTER TABLE `transform` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -105,4 +109,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-03-17 12:27:39
+-- Dump completed on 2021-03-17 14:57:24
