@@ -44,10 +44,10 @@ class DataBase:
         cursor.close()
         return __quantity_pieces
 
-    def request_orders_db(self, table):
-        __query = "SELECT * FROM %s;"
+    def request_orders_db(self):
+        __query = "SELECT * FROM transform;"
         cursor = self.mysqldb.cursor()
-        cursor.execute(__query % table)
+        cursor.execute(__query)
         __orders = []
         __order = {}
         for row in cursor.fetchall():
