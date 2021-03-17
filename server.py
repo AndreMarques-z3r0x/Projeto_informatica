@@ -24,7 +24,7 @@ def request_orders_db():
                 "penalty":i,
                 "start":i,
                 "end":i,
-                "penaltyincurred":i
+                "penalty_incurred":i
                 }
     return dic
 
@@ -77,7 +77,7 @@ class com_erp:
             '<Order Number="{}">\n'
             '<Transform From="{}" To="{}" Quantity="{}" Quantity1="{}" Quantity2="{}" Quantity3="{}" Time="{}" Time1="{}" MaxDelay="{}" Penalty="{}" Start="{}" End="{}" PenaltyIncurred="{}"/>\n'
             '</Order>\n').format(msg,l["nnn"],l["from"],l["to"],l["quantity"],l["quantity1"],\
-            l["quantity2"],l["quantity3"],l["time"],l["time1"],l["max_delay"],l["penalty"],l["start"],l["end"],l["penaltyincurred"])
+            l["quantity2"],l["quantity3"],l["time"],l["time1"],l["max_delay"],l["penalty"],l["start"],l["end"],l["penalty_incurred"])
         msg=msg + '</Order_Schedule>'
         self.send_msg_udp(msg,addr)
 
@@ -87,7 +87,7 @@ class ordem:
         self.quantity1=0
         self.time_inicio=0
         self.time_fim=0
-        self.time_mes=time.time()
+        self.time_mes=int(time.time())
         for info in mensagem.findall('Transform'):
             self.number=int(mensagem.attrib["Number"])
             self.fro=info.attrib["From"]
@@ -102,7 +102,7 @@ class ordem:
         self.print_info()
         dic={"nnn":self.number,"from":self.fro,"to":self.to,"quantity":self.quantity,"quantity1":self.quantity1,"quantity2": self.quantity2,\
         "quantity3":self.quantity3,"time":self.time_erp,"time1":self.time_mes,"max_delay":self.maxdelay,\
-        "penalty":self.penalty,"start":self.time_inicio,"end":self.time_fim,"penaltyincurred":self.actual_penalty}
+        "penalty":self.penalty,"start":self.time_inicio,"end":self.time_fim,"penalty_incurred":self.actual_penalty}
         db.insert_order_db('transform', dic)
         self.calc_penalty()
     def print_info(self):
