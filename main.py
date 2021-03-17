@@ -1,6 +1,6 @@
 import mysql.connector
 from mysql.connector import errorcode
-#ahahaha
+
 
 class DataBase:
     def __init__(self, filename):
@@ -71,6 +71,7 @@ class DataBase:
                 }
             except ValueError:
                 print("error while fetching data")
+                return 1
             finally:
                 __orders.append(__order)
         return __orders
@@ -110,14 +111,12 @@ class DataBase:
             except mysql.connector.Error as err:
                 print("Something went wrong: {}".format(err))
                 return 1
-            finally:
-                print("Order was successfully inserted on table")
-                return 1
         except ValueError:
             print('Error passing table name')
             return 1
         finally:
             cursor.close()
+            print('Order sucessfully inserted')
             return 0
 
     def update_order_db(self, table, data):
@@ -146,13 +145,25 @@ class DataBase:
             print(__query)
             __cursor.execute(__query)
             self.mysqldb.commit()
+        return 0
+
+    def clear_db_tables(self):
+        __query = "DELETE FROM transform;"
+        __cursor = self.mysqldb.cursor()
+        __cursor.execute(__query)
+        __query = "DELETE FROM unload;"
+        __cursor.execute(__query)
+        self.mysqldb.commit()
+        __cursor.close()
+        return 0
+
 
 
 def main():
     db = DataBase("dbConfig.txt")
     q = db.request_stores_db()
     info = {
-        'nnn': 10,
+        'nnn': 5,
         'from': 'P2',
         'to': 'P3',
         'quantity': 69,
@@ -183,7 +194,7 @@ def main():
     #db.insert_order_db('stores', information)
     #orders = db.request_orders_db('transform')
     #db.update_order_db("transform", information)
-
+    db.clear_db_tables()
 
 if __name__ == '__main__':
     main()
