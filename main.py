@@ -1,6 +1,6 @@
 import mysql.connector
 from mysql.connector import errorcode
-#ahahahah
+
 
 class DataBase:
     def __init__(self, filename):
@@ -87,22 +87,24 @@ class DataBase:
             for i in range(__columns.__len__()):
                 if i == __columns.__len__()-1:
                     __query_columns += ('`' + __columns[i] + '`')
-                    if __columns[i] == 'from' or __columns[i] == 'to' or __columns[i] == 'piece':
+                    if __columns[i] in ('from', 'to', 'piece', 'type', 'destination'):
                         __query_values += ("'" + data[__columns[i]] + "'")
                     else:
                         __query_values += (str(data[__columns[i]]))
                 else:
                     __query_columns += ('`' + __columns[i] + '`, ')
-                    if __columns[i] == 'from' or __columns[i] == 'to' or __columns[i] == 'piece':
+                    if __columns[i] in ('from', 'to', 'piece', 'type', 'destination'):
                         __query_values += ("'" + data[__columns[i]] + "', ")
                     else:
                         __query_values += (str(data[__columns[i]]) + ", ")
             __query = __query % (__query_columns, __query_values)
+            print(__query)
             try:
                 cursor.execute(__query)
                 self.mysqldb.commit()
             except mysql.connector.Error as err:
                 print("Something went wrong: {}".format(err))
+                return 1
             finally:
                 print("Order was successfully inserted on table")
                 return 1
@@ -115,7 +117,7 @@ class DataBase:
 
     def update_order_db(self, table, data):
         __columns = []
-        cursor = self.mysqldb.cursor()
+        __cursor = self.mysqldb.cursor()
         __query = "UPDATE " + table + " SET "
         try:
             for (name, value) in data.items():
@@ -137,7 +139,8 @@ class DataBase:
             elif __columns[0] == 'piece':
                 __query += " WHERE (`piece` = " + str(data['piece']) + ");"
             print(__query)
-
+            __cursor.execute(__query)
+            self.mysqldb.commit()
 
 
 def main():
@@ -154,6 +157,16 @@ def main():
         'quantity1': 0,
         'quantity2': 0,
         'quantity3': 0,
+        'time1': 0,
+        'start': 0,
+        'end': 0,
+        'penalty_incurred': 0,
+    }
+    info2 = {
+        'nnn': 1,
+        'type': 'P1',
+        'destination': 'P3',
+        'quantity': 5,
     }
     ret = db.insert_order_db('transform', info)
     information = {
@@ -162,7 +175,8 @@ def main():
     }
     #db.insert_order_db('stores', information)
     #orders = db.request_orders_db('transform')
-    db.update_order_db("transform", information)
+    #db.update_order_db("transform", information)
+
 
 if __name__ == '__main__':
     main()
