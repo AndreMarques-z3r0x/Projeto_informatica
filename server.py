@@ -71,7 +71,12 @@ class com_erp:
             '</Current_Stores>').format(stores[0],stores[1],stores[2],stores[3],stores[4],stores[5],stores[6],stores[7],stores[8])
         self.send_msg_udp(msg,addr)
     def send_orders(self,addr):
-        dic=db.request_orders_db()
+        try:
+            dic=db.request_orders_db()
+            print(dic)
+        except ValueError:
+            print('estourou func')
+
         msg='<Order_Schedule>\n'
         for l in dic:
             msg=('{}'

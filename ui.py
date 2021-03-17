@@ -206,7 +206,7 @@ class Ui_ERP(object):
     def send_req_orders(self):
         msg='<Request_Orders/>'
         self.clt.sendto(msg.encode('utf-8'),(self.HOST,self.PORT))
-        data,addr=self.clt.recvfrom(1025)
+        data,addr=self.clt.recvfrom(100000)
         text=str(data,'utf-8')
         self.lrordens.setText(text)
         self.lrordens.adjustSize()
