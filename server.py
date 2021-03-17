@@ -24,7 +24,8 @@ def request_orders_db():
                 "penalty":i,
                 "start":i,
                 "end":i,
-                "penalty_incurred":i
+                "penalty_incurred":i,
+                "estado":i
                 }
     return dic
 
@@ -56,7 +57,7 @@ class com_erp:
             print("req_order")
             self.send_orders(addr)
     def send_stores(self,addr):
-        stores=request_stores_db()
+        stores=db.request_stores_db()
         msg=('<Current_Stores>\n'
             '<WorkPiece type="P1" quantity="{}"/>\n'
             '<WorkPiece type="P2" quantity="{}"/>\n'
@@ -70,7 +71,7 @@ class com_erp:
             '</Current_Stores>').format(stores[0],stores[1],stores[2],stores[3],stores[4],stores[5],stores[6],stores[7],stores[8])
         self.send_msg_udp(msg,addr)
     def send_orders(self,addr):
-        dic=request_orders_db()
+        dic=db.request_orders_db()
         msg='<Order_Schedule>\n'
         for l in dic:
             msg=('{}'
@@ -102,7 +103,7 @@ class ordem:
         self.print_info()
         dic={"nnn":self.number,"from":self.fro,"to":self.to,"quantity":self.quantity,"quantity1":self.quantity1,"quantity2": self.quantity2,\
         "quantity3":self.quantity3,"time":self.time_erp,"time1":self.time_mes,"max_delay":self.maxdelay,\
-        "penalty":self.penalty,"start":self.time_inicio,"end":self.time_fim,"penalty_incurred":self.actual_penalty}
+        "penalty":self.penalty,"start":self.time_inicio,"end":self.time_fim,"penalty_incurred":self.actual_penalty,'estado':self.estado}
         db.insert_order_db('transform', dic)
         self.calc_penalty()
     def print_info(self):
@@ -133,7 +134,7 @@ class descarga:
             self.tipo=desc.attrib["Type"]
             self.destino=desc.attrib["Destination"]
             self.quantity=int(desc.attrib["Quantity"])
-        dic={"nnn":self.number,"type":self.tipo,"destination":self.destino,"quantity":self.quantity}
+        dic={"nnn":self.number,"type":self.tipo,"destination":self.destino,"quantity":self.quantity,'estado':self.estado}
         db.insert_order_db('unload', dic)
 
         self.print_info()
