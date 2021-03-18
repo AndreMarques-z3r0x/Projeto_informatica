@@ -46,6 +46,11 @@ class com_erp:
         self.server.sendto(msg,addr)
     def parse_info(self,msg,addr):
         mensagem=ET.fromstring(msg)
+
+        if mensagem.tag=='ORDERS':
+            for ord in mensagem:
+                 lista_ordens_pendentes.append(ordem(ord))
+
         if mensagem.tag=='Order':
             if mensagem.findall('Transform')!=[]:
                 lista_ordens_pendentes.append(ordem(mensagem))
@@ -95,7 +100,7 @@ class ordem:
         self.time_inicio=0
         self.time_fim=0
         self.time_mes=int(time.time())
-        for info in mensagem.findall('Transform'):
+        for info in mensagem:
             self.number=int(mensagem.attrib["Number"])
             self.fro=info.attrib["From"]
             self.to=info.attrib["To"]
@@ -135,7 +140,7 @@ class ordem:
 class descarga:
     def __init__(self,mensagem):
         self.estado=0
-        for desc in mensagem.findall('Unload'):
+        for desc in mensagem:
             self.number=int(mensagem.attrib["Number"])
             self.tipo=desc.attrib["Type"]
             self.destino=desc.attrib["Destination"]
