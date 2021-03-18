@@ -1,4 +1,4 @@
 # Projeto_informatica
 
-YOU ARE ALL GAY!!!!
+ficking fricks!!!
 Ahahah
