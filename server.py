@@ -115,8 +115,10 @@ class ordem:
         dic={"nnn":self.number,"from":self.fro,"to":self.to,"quantity":self.quantity,"quantity1":self.quantity1,"quantity2": self.quantity2,\
         "quantity3":self.quantity3,"time":self.time_erp,"time1":self.time_mes,"max_delay":self.maxdelay,\
         "penalty":self.penalty,"start":self.time_inicio,"end":self.time_fim,"penalty_incurred":self.actual_penalty,'estado':self.estado}
+        self.transorma()
         db.insert_order_db('transform', dic)
         self.calc_penalty()
+        
     def print_info(self):
         print('---------------------------------')
         print('number= ',self.number)
@@ -126,6 +128,7 @@ class ordem:
         print('maxmelay= ',self.maxdelay)
         print('penalty= ',self.penalty)
         print('---------------------------------')
+
     def calc_penalty(self):
         sec=time.time()-self.time_erp
         if sec<self.maxdelay:
@@ -136,6 +139,32 @@ class ordem:
         print('---------------------------------')
         print('actual_penalty=',self.actual_penalty)
         print('---------------------------------')
+    def transforma(self):
+        a=['','P1','P2','P3','P4','P5','P6','P7','P8','P9']
+        self.transf=[0]*9
+
+        de=a.index(self.fro)
+        para=a.index(self.to)
+
+        if de<=5 and para==9:
+            self.transf[6]=self.quantity
+        if de<=5 and para==6:
+            self.transf[5]=self.quantity
+        if de<=6 and para==7:
+            self.transf[7]=self.quantity
+        if de<=6 and para==8:
+            self.transf[8]=self.quantity
+        for i in range(de,5):
+            self.transf[i]=self.quantity
+
+        self.t1=self.transf[1]+self.transf[4]+self.transf[8]
+        self.t2=self.transf[2]+self.transf[5]
+        self.t3=self.transf[3]+self.transf[6]+self.transf[7]
+        print('t1= ',self.t1)
+        print('t2= ',self.t2)
+        print('t3= ',self.t3)
+
+
 
 class descarga:
     def __init__(self,mensagem):
