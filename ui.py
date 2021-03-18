@@ -183,7 +183,7 @@ class Ui_ERP(object):
     def send_order(self):
         msg='<Order Number="{}"><Transform From="{}" To="{}" Quantity="{}" Time="{}" MaxDelay="{}" Penalty="{}"/></Order>'.format(self.id,self.p[self.sfrom.value()],self.p[self.sto.value()],self.squantity1.value(),int(time.time()),self.smaxdelay.value(),self.spenalty.value())
         self.id=self.id+1
-        msg='<ORDERS><Order Number="001"><Transform From="1" To="2" Quantity="10" Time="500" MaxDelay="420" Penalty="69"/></Order><Order Number="002"><Transform From="1" To="2" Quantity="10" Time="500" MaxDelay="420" Penalty="69"/></Order></ORDERS>'
+        #msg='<ORDERS><Order Number="001"><Transform From="P1" To="P2" Quantity="10" Time="500" MaxDelay="420" Penalty="69"/></Order><Order Number="002"><Transform From="P2" To="P8" Quantity="10" Time="500" MaxDelay="420" Penalty="69"/></Order></ORDERS>'
         self.clt.sendto(msg.encode('utf-8'),(self.HOST,self.PORT))
         text='id={} \nfrom={} \nTo={} \nQuantity={} \nMaxDelay={}\npenalty={}'.format(self.id,self.p[self.sfrom.value()],self.p[self.sto.value()],self.squantity1.value(),self.smaxdelay.value(),self.spenalty.value())
         self.lmsgordem.setText(text)

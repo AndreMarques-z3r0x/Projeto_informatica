@@ -115,10 +115,10 @@ class ordem:
         dic={"nnn":self.number,"from":self.fro,"to":self.to,"quantity":self.quantity,"quantity1":self.quantity1,"quantity2": self.quantity2,\
         "quantity3":self.quantity3,"time":self.time_erp,"time1":self.time_mes,"max_delay":self.maxdelay,\
         "penalty":self.penalty,"start":self.time_inicio,"end":self.time_fim,"penalty_incurred":self.actual_penalty,'estado':self.estado}
-        self.transorma()
+        self.transforma()
         db.insert_order_db('transform', dic)
         self.calc_penalty()
-        
+
     def print_info(self):
         print('---------------------------------')
         print('number= ',self.number)
@@ -143,23 +143,29 @@ class ordem:
         a=['','P1','P2','P3','P4','P5','P6','P7','P8','P9']
         self.transf=[0]*9
 
-        de=a.index(self.fro)
-        para=a.index(self.to)
+        self.de=a.index(self.fro)
+        self.para=a.index(self.to)
 
-        if de<=5 and para==9:
+        if self.de<=5 and self.para==9:
             self.transf[6]=self.quantity
-        if de<=5 and para==6:
+        if self.de<=5 and self.para==6:
             self.transf[5]=self.quantity
-        if de<=6 and para==7:
+        if self.de<=6 and self.para==7:
             self.transf[7]=self.quantity
-        if de<=6 and para==8:
+        if self.de<=6 and self.para==8:
             self.transf[8]=self.quantity
-        for i in range(de,5):
-            self.transf[i]=self.quantity
+        if self.de<=5 and self.para>=6 and self.para<=8 :
+            self.transf[5]=self.quantity
+        for i in range(self.de,self.para):
+            if i<5:
+                self.transf[i]=self.quantity
+            else: break
 
         self.t1=self.transf[1]+self.transf[4]+self.transf[8]
         self.t2=self.transf[2]+self.transf[5]
         self.t3=self.transf[3]+self.transf[6]+self.transf[7]
+        print(self.de,self.para)
+        print(self.transf)
         print('t1= ',self.t1)
         print('t2= ',self.t2)
         print('t3= ',self.t3)
