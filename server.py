@@ -1,11 +1,8 @@
 from socket import *
 import xml.etree.ElementTree as ET
 import time
-from main import DataBase
-lista_ordens_pendentes=[]
-lista_descargas_pendentes=[]
-db = DataBase("dbConfig.txt")
-db.clear_db_tables()
+from database import DataBase
+
 def request_stores_db():
     return [1, 2, 3, 4, 5, 6, 7, 8, 9]
 def request_orders_db():
@@ -30,6 +27,8 @@ def request_orders_db():
                 }
     return dic
 
+
+
 class com_erp:
     def __init__(self,host,port):
         self.HOST=host
@@ -37,6 +36,7 @@ class com_erp:
         self.server = socket(AF_INET, SOCK_DGRAM)
         print("inicio server")
         self.server.bind((self.HOST,self.PORT))
+
     def read_msg_udp(self):
             msg,addr=self.server.recvfrom(1025)
             print("data= ",str(msg,'utf-8'))
@@ -150,10 +150,17 @@ class descarga:
         print('destino= ',self.destino)
         print('quantity= ',self.quantity)
 
-erp=com_erp("127.0.0.1",54321)
 
-while 1:
-    msg,addr=erp.read_msg_udp()
-    erp.parse_info(msg,addr)
-    print('ordens pententes=',len(lista_ordens_pendentes))
-    print('descargas pententes=',len(lista_descargas_pendentes))
+erp=com_erp("127.0.0.1",54321)
+lista_ordens_pendentes=[]
+lista_descargas_pendentes=[]
+db = DataBase("dbConfig.txt")
+db.clear_db_tables()
+
+if __name__ == '__main__':
+
+    while 1:
+        msg,addr=erp.read_msg_udp()
+        erp.parse_info(msg,addr)
+        print('ordens pententes=',len(lista_ordens_pendentes))
+        print('descargas pententes=',len(lista_descargas_pendentes))
