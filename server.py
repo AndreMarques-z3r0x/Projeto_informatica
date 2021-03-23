@@ -5,6 +5,7 @@ from database import DataBase
 
 def request_stores_db():
     return [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
 def request_orders_db():
     dic=[0,0,0]
     for i in range(3):
@@ -26,8 +27,6 @@ def request_orders_db():
                 "estado":i
                 }
     return dic
-
-
 
 class com_erp:
     def __init__(self,host,port):
@@ -118,7 +117,7 @@ class ordem:
         self.transforma()
         db.insert_order_db('transform', dic)
         self.calc_penalty()
-
+        self.tempo_atual()
     def print_info(self):
         print('---------------------------------')
         print('number= ',self.number)
@@ -128,13 +127,14 @@ class ordem:
         print('maxmelay= ',self.maxdelay)
         print('penalty= ',self.penalty)
         print('---------------------------------')
-
+    def tempo_atual(self):
+        self.tdecorrer=self.maxdelay-(time.time()-self.time_erp)
+        print('falta',self.sec)
     def calc_penalty(self):
-        sec=time.time()-self.time_erp
-        if sec<self.maxdelay:
+        self.sec=time.time()-self.time_erp
+        if self.sec<self.maxdelay:
             self.actual_penalty=0
-        else:
-            sec=int((sec-self.maxdelay)/50)+1
+            sec=int((self.sec-self.maxdelay)/50)+1
             self.actual_penalty=sec*self.penalty
         print('---------------------------------')
         print('actual_penalty=',self.actual_penalty)
@@ -170,8 +170,6 @@ class ordem:
         print('t2= ',self.t2)
         print('t3= ',self.t3)
 
-
-
 class descarga:
     def __init__(self,mensagem):
         self.estado=0
@@ -190,12 +188,21 @@ class descarga:
         print('destino= ',self.destino)
         print('quantity= ',self.quantity)
 
+class maneger:
+    def sort_order(self,lista):
+        for l in lista:
+            l.tempo_atual()
+        lista.sort(key=lambda x:x.tdecorrer, reverse=True)
+        for l in lista:
+            print('sort- ',l.number)
+        return lista
 
 erp=com_erp("127.0.0.1",54321)
 lista_ordens_pendentes=[]
 lista_descargas_pendentes=[]
 db = DataBase("dbConfig.txt")
 db.clear_db_tables()
+man=maneger()
 
 if __name__ == '__main__':
 
@@ -204,3 +211,4 @@ if __name__ == '__main__':
         erp.parse_info(msg,addr)
         print('ordens pententes=',len(lista_ordens_pendentes))
         print('descargas pententes=',len(lista_descargas_pendentes))
+        man.sort_order(lista_ordens_pendentes)
