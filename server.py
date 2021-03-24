@@ -2,7 +2,7 @@ from socket import *
 import xml.etree.ElementTree as ET
 import time
 from database import DataBase
-
+import random
 def request_stores_db():
     return [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
@@ -160,7 +160,7 @@ class ordem:
             if i<5:
                 self.transf[i]=self.quantity
             else: break
-
+        self.falta=self.transf
         self.t1=self.transf[1]+self.transf[4]+self.transf[8]
         self.t2=self.transf[2]+self.transf[5]
         self.t3=self.transf[3]+self.transf[6]+self.transf[7]
@@ -189,6 +189,21 @@ class descarga:
         print('quantity= ',self.quantity)
 
 class maneger:
+    def __init__(self) :
+        self.transf=[0,0,0,0,0,0,0,0,0]
+        self.t1=0
+        self.t2=0
+        self.t3=0
+    def teste_ler_var(self,valor):
+        for i in range(1,9):
+            if self.transf[i]>valor+1:
+                self.transf[i]=self.transf[i]-random.randrange(valor)
+            else:
+                self.transf[i]=0
+
+    def teste_escrever_var(self):
+        return 1
+
     def sort_order(self,lista):
         for l in lista:
             l.tempo_atual()
@@ -197,9 +212,87 @@ class maneger:
             print('sort- ',l.number)
         return lista
 
+    def loop(self):
+
+        self.teste_ler_var(2)
+
+        self.t1=self.transf[1]+self.transf[4]+self.transf[8]
+        self.t2=self.transf[2]+self.transf[5]
+        self.t3=self.transf[3]+self.transf[6]+self.transf[7]
+        print('f1= {},f2= {},f3 == {}'.format(self.t1,self.t2,self.t3))
+        if self.t1!=5 or self.t2!=5 or self.t3!=55:
+
+             f1=5-self.t1
+             f2=5-self.t2
+             f3=5-self.t3
+             print('calc-f1= {},f2= {},f3 == {}'.format(f1,f2,f3))
+             for pedido in lista_ordens_correntes:
+                if f1>0:
+                    for j in [1,4,8]:
+                        if f1>0:
+                            if pedido.falta[j]>0:
+                                pedido.falta[j]=pedido.falta[j]-f1
+                                self.transf[j]=self.transf[j]+f1
+                                f1=0
+                                if pedido.falta[j]<0:
+                                    f1=pedido.falta[j]*(-1)
+                                    pedido.falta[j]=0
+                                    self.transf[j]=self.transf[j]-f1
+                                if pedido.falta[j]>0:
+                                    f1=0
+                if f2>0:
+                    for j in [2,5]:
+                        if pedido.falta[j]>0:
+                            pedido.falta[j]=pedido.falta[j]-f2
+                            self.transf[j]=self.transf[j]+f2
+                            f2=0
+                            if pedido.falta[j]<0:
+                                f2=pedido.falta[j]*(-1)
+                                pedido.falta[j]=0
+                                self.transf[j]=self.transf[j]-f2
+                            if pedido.falta[j]>0:
+                                f2=0
+                if f3>0:
+                    for j in [3,6,7]:
+                        if pedido.falta[j]>0:
+                            pedido.falta[j]=pedido.falta[j]-f3
+                            self.transf[j]=self.transf[j]+f3
+                            f3=0
+                            if pedido.falta[j]<0:
+                                f3=pedido.falta[j]*(-1)
+                                pedido.falta[j]=0
+                                self.transf[j]=self.transf[j]-f3
+                            if pedido.falta[j]>0:
+                                f3=0
+
+             if f1>0 or f2>0 or f3>0:
+                lista_ordens_correntes.append(lista_ordens_pendentes.pop(0))
+
+
+        print('fim-f1= {},f2= {},f3 == {}'.format(f1,f2,f3))
+        j=0
+        for i in lista_ordens_correntes:
+            if sum(i.falta)==0:
+                print('pop ',i.falta)
+                lista_ordens_feitas.append(lista_ordens_correntes.pop(j))
+
+            j=j+1
+            print('lista',i.falta)
+        print('self=',self.transf)
+        print('soma',sum(self.transf))
+        print('----------')
+
+
+
+
+
+
+
 erp=com_erp("127.0.0.1",54321)
 lista_ordens_pendentes=[]
+lista_ordens_correntes=[]
 lista_descargas_pendentes=[]
+lista_ordens_feitas=[]
 db = DataBase("dbConfig.txt")
 db.clear_db_tables()
 man=maneger()
@@ -212,3 +305,4 @@ if __name__ == '__main__':
         print('ordens pententes=',len(lista_ordens_pendentes))
         print('descargas pententes=',len(lista_descargas_pendentes))
         man.sort_order(lista_ordens_pendentes)
+        man.loop()
