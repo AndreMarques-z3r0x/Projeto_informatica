@@ -202,10 +202,8 @@ class manager:
                 self.transf[i]=self.transf[i]-random.randrange(valor)
             else:
                 self.transf[i]=0
-
     def teste_escrever_var(self):
         return 1
-
     def sort_order(self,lista):
         for l in lista:
             l.tempo_atual()
@@ -213,7 +211,6 @@ class manager:
         for l in lista:
             print('sort- ',l.number)
         return lista
-
     def loop(self):
 
         self.teste_ler_var(2)
@@ -272,14 +269,14 @@ class manager:
 
 
         print('fim-f1= {},f2= {},f3 == {}'.format(f1,f2,f3))
-        j=0
 
+        j=0
         for i in lista_ordens_correntes:
             if sum(i.falta)==0:
                 print('pop ',i.falta)
                 lista_ordens_feitas.append(lista_ordens_correntes.pop(j))
-
             j=j+1
+
             print('lista',i.falta)
 
         print('self=',self.transf)
@@ -291,6 +288,7 @@ def loop_man():
             man.sort_order(lista_ordens_pendentes)
             man.loop()
             time.sleep(1)
+
 
 
 erp=com_erp("127.0.0.1",54321)
