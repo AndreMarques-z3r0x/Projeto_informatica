@@ -3,6 +3,8 @@ import xml.etree.ElementTree as ET
 import time
 from database import DataBase
 import random
+import threading
+
 def request_stores_db():
     return [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
@@ -188,7 +190,7 @@ class descarga:
         print('destino= ',self.destino)
         print('quantity= ',self.quantity)
 
-class maneger:
+class manager:
     def __init__(self) :
         self.transf=[0,0,0,0,0,0,0,0,0]
         self.t1=0
@@ -265,12 +267,13 @@ class maneger:
                             if pedido.falta[j]>0:
                                 f3=0
 
-             if f1>0 or f2>0 or f3>0:
+             if (f1>0 or f2>0 or f3>0)and lista_ordens_pendentes!=[]:
                 lista_ordens_correntes.append(lista_ordens_pendentes.pop(0))
 
 
         print('fim-f1= {},f2= {},f3 == {}'.format(f1,f2,f3))
         j=0
+
         for i in lista_ordens_correntes:
             if sum(i.falta)==0:
                 print('pop ',i.falta)
@@ -278,14 +281,16 @@ class maneger:
 
             j=j+1
             print('lista',i.falta)
+
         print('self=',self.transf)
         print('soma',sum(self.transf))
         print('----------')
-
-
-
-
-
+def loop_man():
+    while 1:
+        if lista_ordens_pendentes!=[] or lista_ordens_correntes!=[] or sum(man.transf)!=0:
+            man.sort_order(lista_ordens_pendentes)
+            man.loop()
+            time.sleep(1)
 
 
 erp=com_erp("127.0.0.1",54321)
@@ -295,8 +300,9 @@ lista_descargas_pendentes=[]
 lista_ordens_feitas=[]
 db = DataBase("dbConfig.txt")
 db.clear_db_tables()
-man=maneger()
-
+man=manager()
+manager_t = threading.Thread(target=loop_man)
+manager_t.start()
 if __name__ == '__main__':
 
     while 1:
@@ -304,5 +310,3 @@ if __name__ == '__main__':
         erp.parse_info(msg,addr)
         print('ordens pententes=',len(lista_ordens_pendentes))
         print('descargas pententes=',len(lista_descargas_pendentes))
-        man.sort_order(lista_ordens_pendentes)
-        man.loop()
