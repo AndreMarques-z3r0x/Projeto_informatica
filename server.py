@@ -193,6 +193,7 @@ class descarga:
 class manager:
     def __init__(self) :
         self.transf=[0,0,0,0,0,0,0,0,0]
+        self.inc=[0,0,0,0,0,0,0,0,0]
         self.t1=0
         self.t2=0
         self.t3=0
@@ -214,7 +215,7 @@ class manager:
     def loop(self):
 
         self.teste_ler_var(2)
-
+        self.inc=[0,0,0,0,0,0,0,0,0]
         self.t1=self.transf[1]+self.transf[4]+self.transf[8]
         self.t2=self.transf[2]+self.transf[5]
         self.t3=self.transf[3]+self.transf[6]+self.transf[7]
@@ -232,11 +233,13 @@ class manager:
                             if pedido.falta[j]>0:
                                 pedido.falta[j]=pedido.falta[j]-f1
                                 self.transf[j]=self.transf[j]+f1
+                                self.inc[j]=self.inc[j]+f1
                                 f1=0
                                 if pedido.falta[j]<0:
                                     f1=pedido.falta[j]*(-1)
                                     pedido.falta[j]=0
                                     self.transf[j]=self.transf[j]-f1
+                                    self.inc[j]=self.inc[j]-f1
                                 if pedido.falta[j]>0:
                                     f1=0
                 if f2>0:
@@ -244,11 +247,13 @@ class manager:
                         if pedido.falta[j]>0:
                             pedido.falta[j]=pedido.falta[j]-f2
                             self.transf[j]=self.transf[j]+f2
+                            self.inc[j]=self.inc[j]+f2
                             f2=0
                             if pedido.falta[j]<0:
                                 f2=pedido.falta[j]*(-1)
                                 pedido.falta[j]=0
                                 self.transf[j]=self.transf[j]-f2
+                                self.inc[j]=self.inc[j]-f2
                             if pedido.falta[j]>0:
                                 f2=0
                 if f3>0:
@@ -256,11 +261,13 @@ class manager:
                         if pedido.falta[j]>0:
                             pedido.falta[j]=pedido.falta[j]-f3
                             self.transf[j]=self.transf[j]+f3
+                            self.inc[j]=self.inc[j]+f3
                             f3=0
                             if pedido.falta[j]<0:
                                 f3=pedido.falta[j]*(-1)
                                 pedido.falta[j]=0
                                 self.transf[j]=self.transf[j]-f3
+                                self.inc[j]=self.inc[j]-f3
                             if pedido.falta[j]>0:
                                 f3=0
 
@@ -280,6 +287,7 @@ class manager:
             print('lista',i.falta)
 
         print('self=',self.transf)
+        print('inc=', self.inc)
         print('soma',sum(self.transf))
         print('----------')
 def loop_man():
@@ -301,6 +309,7 @@ db.clear_db_tables()
 man=manager()
 manager_t = threading.Thread(target=loop_man)
 manager_t.start()
+
 if __name__ == '__main__':
 
     while 1:
