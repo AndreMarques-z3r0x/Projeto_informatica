@@ -158,10 +158,26 @@ class DataBase:
         return 0
 
 
+    def insert_incr(self, data):
+        __columns = ['P12', 'P23', 'P34', 'P45','P56','P59','P67','P68']
+        __cursor = self.mysqldb.cursor()
+        __pointer = 0
+        for x in data:
+            __query = "UPDATE `informatica`.`orders` SET `quantity` = '" + str(x) + "' WHERE (`piece` = '" + __columns[__pointer] + "');"
+            print(__query)
+            try:
+                __cursor.execute(__query)
+                self.mysqldb.commit()
+            except mysql.connector.Error as err:
+                print("Something went wrong: {}".format(err))
+                return 1
+            __pointer += 1 
+        __cursor.close()
+        return 0
 
 def main():
     db = DataBase("dbConfig.txt")
-    q = db.request_stores_db()
+    #q = db.request_stores_db()
     info = {
         'nnn': 5,
         'from': 'P2',
@@ -186,11 +202,13 @@ def main():
         'quantity': 5,
         'estado': 0,
     }
-    ret = db.insert_order_db('transform', info)
+    #ret = db.insert_order_db('transform', info)
     information = {
         'piece': 'P12',
         'quantity': 90,
     }
+    dt = [10,20,30,40,50,60,70,80]
+    db.insert_incr(dt)
     #db.insert_order_db('stores', information)
     #orders = db.request_orders_db('transform')
     #db.update_order_db("transform", information)
