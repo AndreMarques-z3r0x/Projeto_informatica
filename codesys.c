@@ -40,7 +40,7 @@ int main(void) {
     }
 	mysql_free_result(res);
 
-    int x= 0; 
+    int x= 1; 
     if (x==1){
     UA_Client *client = UA_Client_new();
     UA_ClientConfig_setDefault(UA_Client_getConfig(client));
@@ -74,7 +74,7 @@ int main(void) {
     // Variables for read access
     UA_Boolean RD22;
 
-    retval = UA_Client_readValueAttribute(client, UA_NODEID_STRING(4, "|var|CODESYS Control Win V3 x64.PLC_PRG.RD22"), &value);
+    retval = UA_Client_readValueAttribute(client, UA_NODEID_STRING(4, "|var|CODESYS Control Win V3 x64.Application.GVL.RD22"), &value);
     if(retval == UA_STATUSCODE_GOOD &&
        UA_Variant_hasScalarType(&value, &UA_TYPES[UA_TYPES_BOOLEAN])) {
         RD22 = *(UA_Boolean *) value.data;
@@ -83,16 +83,27 @@ int main(void) {
     else {
         printf("\nNao Leu nada! \n");
     }
-    /* Clean up */
 
+    UA_Int16 temp_val;
+    for (int k=0; k++; k<8){
+        retval = UA_Client_readValueAttribute(client, UA_NODEID_STRING(4, "|var|CODESYS Control Win V3 x64.Application.GVL.transf_inc[4]"), &value);
+            if(retval == UA_STATUSCODE_GOOD &&
+                UA_Variant_hasScalarType(&value, &UA_TYPES[UA_TYPES_INT16])) {
+                temp_val = *(UA_Int16 *) value.data;
+                UA_LOG_INFO(UA_Log_Stdout, UA_LOGCATEGORY_USERLAND,"The state of val is %d", temp_val);
+            }
+            else {
+                printf("\nNao Leu nada! \n");
+            }
+    }
+    /*
     UA_Boolean rdx = UA_TRUE;
-    /* Write node attribute (using the highlevel API) */
     UA_Variant *myVariant = UA_Variant_new();
     UA_Variant_setScalarCopy(myVariant, &rdx, &UA_TYPES[UA_TYPES_BOOLEAN]);
     UA_Client_writeValueAttribute(client, UA_NODEID_STRING(4, "|var|CODESYS Control Win V3 x64.PLC_PRG.RD22"), myVariant);
     UA_Variant_delete(myVariant);
 
-    UA_Client_delete(client); /* Disconnects the client internally */
+    UA_Client_delete(client);*/ /* Disconnects the client internally */
     return EXIT_SUCCESS;
     }
     
