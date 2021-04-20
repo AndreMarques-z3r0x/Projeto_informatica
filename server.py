@@ -274,7 +274,7 @@ class manager:
              if (f1>0 or f2>0 or f3>0)and lista_ordens_pendentes!=[]:
                 lista_ordens_correntes.append(lista_ordens_pendentes.pop(0))
 
-
+        self.teste_escrever_var()
         print('fim-f1= {},f2= {},f3 == {}'.format(f1,f2,f3))
 
         j=0
