@@ -213,7 +213,7 @@ class manager:
 
     def loop_descaargas(self):
 
-        if len(lista_descargas_correntes)<3:
+        if (self.d1+self.d2+self.d3)<3:
             i=0
             for desc in lista_descargas_pendentes:
                 if desc.destino =='P1' and self.d1==0:
@@ -253,12 +253,12 @@ class manager:
                         lista_descargas_feitas.append(self.p1)
                         print('descargas feitas=',len(lista_descargas_feitas))
                         self.d1=0
-                if self.d1==2:
+                if self.d2==1:
                     if dic['unload2'][10]==0:
                         lista_descargas_feitas.append(self.p2)
                         print('descargas feitas=',len(lista_descargas_feitas))
                         self.d2=0
-                if self.d1==3:
+                if self.d3==1:
                     if dic['unload3'][10]==0:
                         lista_descargas_feitas.append(self.p3)
                         print('descargas feitas=',len(lista_descargas_feitas))
