@@ -9,7 +9,7 @@ int main(void) {
 	MYSQL_RES *res;
 	MYSQL_ROW row;
 	
-	char *server = "194.210.208.86";
+	char *server = "192.168.1.86";
 	char *user = "andre";
 	char *password = "andre199921";
 	char *database = "informatica";
@@ -74,7 +74,6 @@ int main(void) {
             UA_Variant_delete(myVariant);
 
             while (true){
-                sleep(5);
                 UA_Int16 temp_val[8];
                 int soma=0;
                 for (int k=2; k<=9;k++){

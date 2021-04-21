@@ -174,17 +174,20 @@ class DataBase:
                 return 1
             __pointer += 1
         __cursor.close()
+        print("A Espera que fique zero!  ")
         while True:
             __cursor = self.mysqldb.cursor()
             __query = "Select * from informatica.orders;"
             __cursor.execute(__query)
             __teste = []
             for __row in __cursor.fetchall():
-                print (__row[1])
+                #print (__row[1])
                 __teste.append(__row[1])
             if __teste[8] == 0:
+                print("Ficou zero!!!!")
+                self.mysqldb.commit()
+                __cursor.close()
                 break
-            print('não esta 0')
             self.mysqldb.commit()
             __cursor.close()
         return [0]+__teste[:-1]
@@ -209,6 +212,7 @@ def main():
         'penalty_incurred': 0,
         'estado': 0,
     }
+    print(info)
     info2 = {
         'nnn': 2,
         'type': 'P1',
@@ -221,7 +225,9 @@ def main():
         'piece': 'P12',
         'quantity': 90,
     }
-    dt = [110,220,330,440,550,660,770,880]
+    dt = [5,0,0,0,0,0,0,0]
+    print(db.insert_incr(dt))
+    dt = [2,0,0,0,0,0,0,0]
     print(db.insert_incr(dt))
     #db.insert_order_db('stores', information)
     #orders = db.request_orders_db('transform')

@@ -118,7 +118,9 @@ class ordem:
         "quantity3":self.quantity3,"time":self.time_erp,"time1":self.time_mes,"max_delay":self.maxdelay,\
         "penalty":self.penalty,"start":self.time_inicio,"end":self.time_fim,"penalty_incurred":self.actual_penalty,'estado':self.estado}
         self.transforma()
+        mutex.acquire()
         db.insert_order_db('transform', dic)
+        mutex.release()
         self.calc_penalty()
         self.tempo_atual()
     def print_info(self):
@@ -182,8 +184,9 @@ class descarga:
             self.destino=desc.attrib["Destination"]
             self.quantity=int(desc.attrib["Quantity"])
         dic={"nnn":self.number,"type":self.tipo,"destination":self.destino,"quantity":self.quantity,'estado':self.estado}
+        mutex.acquire()
         db.insert_order_db('unload', dic)
-
+        mutex.release()
         self.print_info()
     def print_info(self):
         print('number= ',self.number)
@@ -288,17 +291,18 @@ class manager:
         print('inc=', self.inc)
         print('soma',sum(self.transf))
         print('----------')
+        mutex.acquire()
         self.transf = db.insert_incr(self.inc[1:9])
+        mutex.release()
         print('QUALQUER COISA EM CAPS LOCK: !! ' , self.transf)
 def loop_man():
     while 1:
         if lista_ordens_pendentes!=[] or lista_ordens_correntes!=[] or sum(man.transf)!=0:
             man.sort_order(lista_ordens_pendentes)
             man.loop()
-            time.sleep(1)
 
 
-
+mutex = threading.Lock()
 erp=com_erp("127.0.0.1",54321)
 lista_ordens_pendentes=[]
 lista_ordens_correntes=[]
