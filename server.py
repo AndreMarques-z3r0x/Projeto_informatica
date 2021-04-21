@@ -288,7 +288,7 @@ class manager:
         print('inc=', self.inc)
         print('soma',sum(self.transf))
         print('----------')
-        self.transf = db.insert_incr(self.inc[1:-1])
+        self.transf = db.insert_incr(self.inc[1:9])
         print('QUALQUER COISA EM CAPS LOCK: !! ' , self.transf)
 def loop_man():
     while 1:

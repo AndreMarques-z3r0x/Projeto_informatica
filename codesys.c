@@ -9,7 +9,7 @@ int main(void) {
 	MYSQL_RES *res;
 	MYSQL_ROW row;
 	
-	char *server = "192.168.1.86";
+	char *server = "194.210.208.86";
 	char *user = "andre";
 	char *password = "andre199921";
 	char *database = "informatica";
@@ -65,9 +65,9 @@ int main(void) {
 
             char browse_name[150];
             UA_Variant *myVariant = UA_Variant_new();
-            for (int k=1; k<=8;k++){
+            for (int k=2; k<=9;k++){
                 sprintf(browse_name, "|var|CODESYS Control Win V3 x64.Application.GVL.receive[%d]", k);
-                UA_Variant_setScalarCopy(myVariant, &data[k-1], &UA_TYPES[UA_TYPES_INT16]);
+                UA_Variant_setScalarCopy(myVariant, &data[k-2], &UA_TYPES[UA_TYPES_INT16]);
                 UA_Client_writeValueAttribute(client, UA_NODEID_STRING(4, browse_name), myVariant);
             }
 
@@ -77,7 +77,7 @@ int main(void) {
                 sleep(5);
                 UA_Int16 temp_val[8];
                 int soma=0;
-                for (int k=1; k<=8;k++){
+                for (int k=2; k<=9;k++){
                     sprintf(browse_name, "|var|CODESYS Control Win V3 x64.Application.GVL.receive[%d]", k);
                     retval = UA_Client_readValueAttribute(client, UA_NODEID_STRING(4, browse_name), &value);
                         if(retval == UA_STATUSCODE_GOOD && UA_Variant_hasScalarType(&value, &UA_TYPES[UA_TYPES_INT16])) {
@@ -88,15 +88,16 @@ int main(void) {
                             printf("\nNao Leu nada! \n");
                         }
                         soma += temp_val[k-1];
+                        printf("soma e = %d", soma);
                 }
                 if (soma == 0 ){
-                    for (int k=1; k<=8;k++){
+                    for (int k=2; k<=9;k++){
                     sprintf(browse_name, "|var|CODESYS Control Win V3 x64.Application.GVL.transf[%d]", k);
                     retval = UA_Client_readValueAttribute(client, UA_NODEID_STRING(4, browse_name), &value);
                         if(retval == UA_STATUSCODE_GOOD && UA_Variant_hasScalarType(&value, &UA_TYPES[UA_TYPES_INT16])) {
-                            temp_val[k-1] = *(UA_Int16 *) value.data;
-                            UA_LOG_INFO(UA_Log_Stdout, UA_LOGCATEGORY_USERLAND,"The state of tranf is %d", temp_val[k-1]);
-                            sprintf(query, "UPDATE `informatica`.`orders` SET `quantity` = '%d' WHERE `piece`= '%d'",temp_val[k-1], columns[k]);
+                            temp_val[k-2] = *(UA_Int16 *) value.data;
+                            UA_LOG_INFO(UA_Log_Stdout, UA_LOGCATEGORY_USERLAND,"The state of tranf is %d", temp_val[k-2]);
+                            sprintf(query, "UPDATE `informatica`.`orders` SET `quantity` = '%d' WHERE `piece`= '%d'",temp_val[k-2], columns[k-2]);
                             printf("%s",query);
                             if (mysql_query(conn, query)){
                                 fprintf(stderr, "%s\n", mysql_error(conn));

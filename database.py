@@ -222,7 +222,7 @@ def main():
         'quantity': 90,
     }
     dt = [110,220,330,440,550,660,770,880]
-    db.insert_incr(dt)
+    print(db.insert_incr(dt))
     #db.insert_order_db('stores', information)
     #orders = db.request_orders_db('transform')
     #db.update_order_db("transform", information)
