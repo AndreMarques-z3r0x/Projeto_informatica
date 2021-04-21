@@ -178,9 +178,12 @@ class ordem:
 class descarga:
     def __init__(self,mensagem):
         self.estado=0
+        self.a=['','P1','P2','P3','P4','P5','P6','P7','P8','P9']
         for desc in mensagem:
             self.number=int(mensagem.attrib["Number"])
             self.tipo=desc.attrib["Type"]
+            self.tipo_n=self.a.index(self.tipo)
+
             self.destino=desc.attrib["Destination"]
             self.quantity=int(desc.attrib["Quantity"])
         dic={"nnn":self.number,"type":self.tipo,"destination":self.destino,"quantity":self.quantity,'estado':self.estado}
@@ -201,14 +204,80 @@ class manager:
         self.t1=0
         self.t2=0
         self.t3=0
+
+        self.d1=0;
+        self.d2=0;
+        self.d3=0;
+
+
+
+    def loop_descaargas(self):
+
+        if len(lista_descargas_correntes)<3:
+            i=0
+            for desc in lista_descargas_pendentes:
+                if desc.destino =='P1' and self.d1==0:
+                    self.d1=1;
+                    lista_descargas_correntes.append(desc)
+                    self.p1=desc
+                    a=[0,0,0,0,0,0,0,0,0,0,1]
+                    a[desc.tipo_n]=desc.quantity
+                    self.teste_escrever_descargas({'unload1':a})
+                    lista_descargas_pendentes.pop(i)
+                    print('descargas correntes=',len(lista_descargas_correntes))
+                elif desc.destino =='P2' and self.d2==0:
+                    self.d2=1;
+                    lista_descargas_correntes.append(desc)
+                    self.p2=desc
+
+                    a=[0,0,0,0,0,0,0,0,0,0,1]
+                    a[desc.tipo_n]=desc.quantity
+                    self.teste_escrever_descargas({'unload2':a})
+                    lista_descargas_pendentes.pop(i)
+                    print('descargas correntes=',len(lista_descargas_correntes))
+                elif desc.destino =='P3' and self.d3==0:
+                    self.d3=1;
+                    lista_descargas_correntes.append(desc)
+                    self.p3=desc
+
+                    a=[0,0,0,0,0,0,0,0,0,0,1]
+                    a[desc.tipo_n]=desc.quantity
+                    self.teste_escrever_descargas({'unload3':a})
+                    lista_descargas_pendentes.pop(i)
+                    print('descargas correntes=',len(lista_descargas_correntes))
+                i=i+1
+
+                dic=self.teste_ler_descargas()
+                if self.d1==1:
+                    if dic['unload1'][10]==0:
+                        lista_descargas_feitas.append(self.p1)
+                        print('descargas feitas=',len(lista_descargas_feitas))
+                        self.d1=0
+                if self.d1==2:
+                    if dic['unload2'][10]==0:
+                        lista_descargas_feitas.append(self.p2)
+                        print('descargas feitas=',len(lista_descargas_feitas))
+                        self.d2=0
+                if self.d1==3:
+                    if dic['unload3'][10]==0:
+                        lista_descargas_feitas.append(self.p3)
+                        print('descargas feitas=',len(lista_descargas_feitas))
+                        self.d3=0
+
+    def teste_escrever_descargas(self,dic):
+        #print(dic)
+        return 1
+
+    def teste_ler_descargas(self):
+        return {'unload1':[0,0,0,0,0,0,0,0,0,0,0],'unload2':[0,0,0,0,0,0,0,0,0,0,0],'unload3':[0,0,0,0,0,0,0,0,0,0,0]}
+
+
     def teste_ler_var(self,valor):
         for i in range(1,9):
             if self.transf[i]>valor+1:
                 self.transf[i]=self.transf[i]-random.randrange(valor)
             else:
                 self.transf[i]=0
-    def teste_escrever_var(self):
-        return 1
     def sort_order(self,lista):
         for l in lista:
             l.tempo_atual()
@@ -298,19 +367,26 @@ class manager:
 def loop_man():
     while 1:
         if lista_ordens_pendentes!=[] or lista_ordens_correntes!=[] or sum(man.transf)!=0:
-            man.sort_order(lista_ordens_pendentes)
+            man.sort_order()
             man.loop()
+
+        if lista_descargas_pendentes!=[] or lista_descargas_correntes!=[]:
+            man.loop_descaargas()
 
 
 mutex = threading.Lock()
 erp=com_erp("127.0.0.1",54321)
 lista_ordens_pendentes=[]
 lista_ordens_correntes=[]
-lista_descargas_pendentes=[]
 lista_ordens_feitas=[]
+lista_descargas_pendentes=[]
+lista_descargas_correntes=[]
+lista_descargas_feitas=[]
+
 db = DataBase("dbConfig.txt")
 db.clear_db_tables()
 man=manager()
+
 manager_t = threading.Thread(target=loop_man)
 manager_t.start()
 #subprocess.run(["bash", "insert.sh"])
@@ -320,5 +396,4 @@ if __name__ == '__main__':
     while 1:
         msg,addr=erp.read_msg_udp()
         erp.parse_info(msg,addr)
-        print('ordens pententes=',len(lista_ordens_pendentes))
-        print('descargas pententes=',len(lista_descargas_pendentes))
+        print('desc pend=',len(lista_descargas_pendentes))
