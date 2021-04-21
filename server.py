@@ -4,6 +4,7 @@ import time
 from database import DataBase
 import random
 import threading
+import subprocess
 
 def request_stores_db():
     return [1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -214,7 +215,7 @@ class manager:
         return lista
     def loop(self):
 
-        self.teste_ler_var(2)
+        #self.teste_ler_var(2)
         self.inc=[0,0,0,0,0,0,0,0,0]
         self.t1=self.transf[1]+self.transf[4]+self.transf[8]
         self.t2=self.transf[2]+self.transf[5]
@@ -273,9 +274,7 @@ class manager:
 
              if (f1>0 or f2>0 or f3>0)and lista_ordens_pendentes!=[]:
                 lista_ordens_correntes.append(lista_ordens_pendentes.pop(0))
-        DataBase.insert_incr(inc)
         print('fim-f1= {},f2= {},f3 == {}'.format(f1,f2,f3))
-
         j=0
         for i in lista_ordens_correntes:
             if sum(i.falta)==0:
@@ -289,6 +288,8 @@ class manager:
         print('inc=', self.inc)
         print('soma',sum(self.transf))
         print('----------')
+        self.transf = db.insert_incr(self.inc[1:-1])
+        print('QUALQUER COISA EM CAPS LOCK: !! ' , self.transf)
 def loop_man():
     while 1:
         if lista_ordens_pendentes!=[] or lista_ordens_correntes!=[] or sum(man.transf)!=0:
@@ -308,6 +309,7 @@ db.clear_db_tables()
 man=manager()
 manager_t = threading.Thread(target=loop_man)
 manager_t.start()
+#subprocess.run(["bash", "insert.sh"])
 
 if __name__ == '__main__':
 

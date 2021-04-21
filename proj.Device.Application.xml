@@ -8,15 +8,16 @@
   <TypeList>
     <TypeSimple name="T_BOOL" size="1" swapsize="0" typeclass="Bool" iecname="BOOL" />
     <TypeSimple name="T_INT" size="2" swapsize="2" typeclass="Int" iecname="INT" />
-    <TypeArray name="T_ARRAY__1__8__OF_INT" size="16" nativesize="16" typeclass="Array" iecname="ARRAY [1..8] OF INT" basetype="T_INT">
-      <ArrayDim minrange="1" maxrange="8" />
+    <TypeArray name="T_ARRAY__1__9__OF_INT" size="18" nativesize="18" typeclass="Array" iecname="ARRAY [1..9] OF INT" basetype="T_INT">
+      <ArrayDim minrange="1" maxrange="9" />
     </TypeArray>
   </TypeList>
   <NodeList>
     <Node name="Application">
       <Node name="GVL">
         <Node name="RD22" type="T_BOOL" access="ReadWrite" />
-        <Node name="transf_inc" type="T_ARRAY__1__8__OF_INT" access="ReadWrite" />
+        <Node name="receive" type="T_ARRAY__1__9__OF_INT" access="ReadWrite" />
+        <Node name="transf" type="T_ARRAY__1__9__OF_INT" access="ReadWrite" />
       </Node>
     </Node>
   </NodeList>

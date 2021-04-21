@@ -1,6 +1,7 @@
 #include "open62541.h"
 #include <mysql.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 int main(void) {
 
@@ -12,8 +13,24 @@ int main(void) {
 	char *user = "andre";
 	char *password = "andre199921";
 	char *database = "informatica";
+
+    int columns[8] = {12, 23, 34,45,56,59,67,68};
+    char query[150];
 	
-	conn = mysql_init(NULL);
+	UA_Client *client = UA_Client_new();
+    UA_ClientConfig_setDefault(UA_Client_getConfig(client));
+    UA_StatusCode retval = UA_Client_connect(client, "opc.tcp://localhost:4840");
+    if(retval != UA_STATUSCODE_GOOD) {
+        UA_Client_delete(client);
+        printf("Nao conectou! Temos Pena!");
+        return (int)retval;
+        }
+    
+    else{
+        printf("Conectou!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+    }
+    
+    conn = mysql_init(NULL);
 	
 	/* Connect to database */
 	if (!mysql_real_connect(conn, server, user, password, 
@@ -21,94 +38,88 @@ int main(void) {
 		fprintf(stderr, "%s\n", mysql_error(conn));
 		exit(1);
 	}
-	
-	/* get data from orders table */
-	if (mysql_query(conn, "Select * from informatica.orders")) {
-		fprintf(stderr, "%s\n", mysql_error(conn));
-		exit(1);
-	}
+
+	while(1){
+	    /* get data from orders table */
+	    if (mysql_query(conn, "Select * from informatica.orders")) {
+		    fprintf(stderr, "%s\n", mysql_error(conn));
+		    exit(1);
+	    }
    
-	res = mysql_use_result(conn);
+	    res = mysql_use_result(conn);
 	
-	/* output the data */
-    int data[8];
-    int i = 0;
-	while ((row = mysql_fetch_row(res)) != NULL){
-		data[i] = (int)strtol(row[1], (char **)NULL, 10);
-        printf("%d \n", data[i]);
-        i++;
-    }
-	mysql_free_result(res);
-
-    int x= 1; 
-    if (x==1){
-    UA_Client *client = UA_Client_new();
-    UA_ClientConfig_setDefault(UA_Client_getConfig(client));
-    UA_StatusCode retval = UA_Client_connect(client, "opc.tcp://localhost:4840");
-    if(retval != UA_STATUSCODE_GOOD) {
-        UA_Client_delete(client);
-        printf("Nao conectou! Temos Pena!");
-        return (int)retval;
-    }
-    else{
-        printf("Conectou!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-    }
-
-    /* Read the value attribute of the node. UA_Client_readValueAttribute is a
-     * wrapper for the raw read service available as UA_Client_Service_read. */
-    UA_Variant value; /* Variants can hold scalar values and arrays of any type */
-    UA_Variant_init(&value);
-
-    /* NodeId of the variable holding the current time */
-    const UA_NodeId nodeId = UA_NODEID_NUMERIC(0, UA_NS0ID_SERVER_SERVERSTATUS_CURRENTTIME);
-    retval = UA_Client_readValueAttribute(client, nodeId, &value);
-
-    if(retval == UA_STATUSCODE_GOOD &&
-       UA_Variant_hasScalarType(&value, &UA_TYPES[UA_TYPES_DATETIME])) {
-        UA_DateTime raw_date = *(UA_DateTime *) value.data;
-        UA_DateTimeStruct dts = UA_DateTime_toStruct(raw_date);
-        UA_LOG_INFO(UA_Log_Stdout, UA_LOGCATEGORY_USERLAND, "date is: %u-%u-%u %u:%u:%u.%03u\n",
-                    dts.day, dts.month, dts.year, dts.hour, dts.min, dts.sec, dts.milliSec);
-    }
-
-    // Variables for read access
-    UA_Boolean RD22;
-
-    retval = UA_Client_readValueAttribute(client, UA_NODEID_STRING(4, "|var|CODESYS Control Win V3 x64.Application.GVL.RD22"), &value);
-    if(retval == UA_STATUSCODE_GOOD &&
-       UA_Variant_hasScalarType(&value, &UA_TYPES[UA_TYPES_BOOLEAN])) {
-        RD22 = *(UA_Boolean *) value.data;
-        UA_LOG_INFO(UA_Log_Stdout, UA_LOGCATEGORY_USERLAND,"The state of RD22 is %d", RD22);
-    }
-    else {
-        printf("\nNao Leu nada! \n");
-    }
-
-    UA_Int16 temp_val;
-    for (int k=0; k<8;k++){
-    retval = UA_Client_readValueAttribute(client, UA_NODEID_STRING(4, "|var|CODESYS Control Win V3 x64.Application.GVL.transf_inc[4]"), &value);
-        if(retval == UA_STATUSCODE_GOOD &&
-            UA_Variant_hasScalarType(&value, &UA_TYPES[UA_TYPES_INT16])) {
-            temp_val = *(UA_Int16 *) value.data;
-            UA_LOG_INFO(UA_Log_Stdout, UA_LOGCATEGORY_USERLAND,"The state of val is %d", temp_val);
+	    /* output the data */
+        int data[9];
+        int i = 0;
+        while ((row = mysql_fetch_row(res)) != NULL){
+            data[i] = (int)strtol(row[1], (char **)NULL, 10);
+            //printf("%d \n", data[i]);
+            i++;
         }
-        else {
-            printf("\nNao Leu nada! \n");
-        }
-    }
+        mysql_free_result(res);
 
-    /*
-    UA_Boolean rdx = UA_TRUE;
-    UA_Variant *myVariant = UA_Variant_new();
-    UA_Variant_setScalarCopy(myVariant, &rdx, &UA_TYPES[UA_TYPES_BOOLEAN]);
-    UA_Client_writeValueAttribute(client, UA_NODEID_STRING(4, "|var|CODESYS Control Win V3 x64.PLC_PRG.RD22"), myVariant);
-    UA_Variant_delete(myVariant);
+        if (data[8] == 1){
 
-    UA_Client_delete(client);*/ /* Disconnects the client internally */
-    return EXIT_SUCCESS;
-    }
-    
-    mysql_close(conn);
-    return 0;
+            UA_Variant value;
+            UA_Variant_init(&value);
 
+            char browse_name[150];
+            UA_Variant *myVariant = UA_Variant_new();
+            for (int k=1; k<=8;k++){
+                sprintf(browse_name, "|var|CODESYS Control Win V3 x64.Application.GVL.receive[%d]", k);
+                UA_Variant_setScalarCopy(myVariant, &data[k-1], &UA_TYPES[UA_TYPES_INT16]);
+                UA_Client_writeValueAttribute(client, UA_NODEID_STRING(4, browse_name), myVariant);
+            }
+
+            UA_Variant_delete(myVariant);
+
+            while (true){
+                sleep(5);
+                UA_Int16 temp_val[8];
+                int soma=0;
+                for (int k=1; k<=8;k++){
+                    sprintf(browse_name, "|var|CODESYS Control Win V3 x64.Application.GVL.receive[%d]", k);
+                    retval = UA_Client_readValueAttribute(client, UA_NODEID_STRING(4, browse_name), &value);
+                        if(retval == UA_STATUSCODE_GOOD && UA_Variant_hasScalarType(&value, &UA_TYPES[UA_TYPES_INT16])) {
+                            temp_val[k-1] = *(UA_Int16 *) value.data;
+                           // UA_LOG_INFO(UA_Log_Stdout, UA_LOGCATEGORY_USERLAND,"The state of transf_incremento is %d", temp_val[k-1]);
+                        }
+                        else {
+                            printf("\nNao Leu nada! \n");
+                        }
+                        soma += temp_val[k-1];
+                }
+                if (soma == 0 ){
+                    for (int k=1; k<=8;k++){
+                    sprintf(browse_name, "|var|CODESYS Control Win V3 x64.Application.GVL.transf[%d]", k);
+                    retval = UA_Client_readValueAttribute(client, UA_NODEID_STRING(4, browse_name), &value);
+                        if(retval == UA_STATUSCODE_GOOD && UA_Variant_hasScalarType(&value, &UA_TYPES[UA_TYPES_INT16])) {
+                            temp_val[k-1] = *(UA_Int16 *) value.data;
+                            UA_LOG_INFO(UA_Log_Stdout, UA_LOGCATEGORY_USERLAND,"The state of tranf is %d", temp_val[k-1]);
+                            sprintf(query, "UPDATE `informatica`.`orders` SET `quantity` = '%d' WHERE `piece`= '%d'",temp_val[k-1], columns[k]);
+                            printf("%s",query);
+                            if (mysql_query(conn, query)){
+                                fprintf(stderr, "%s\n", mysql_error(conn));
+                                exit(1);
+                            }
+                        }
+                        else {
+                            printf("\nNao Leu nada! \n");
+                        }  
+                    }
+                    sprintf(query, "UPDATE `informatica`.`orders` SET `quantity` = '0' WHERE `piece`= '99'");
+                    if (mysql_query(conn, query)){
+                        fprintf(stderr, "%s\n", mysql_error(conn));
+                        exit(1);
+                    }
+                    break;
+                }
+            }
+  }
 }
+UA_Client_delete(client); /* Disconnects the client internally */
+mysql_close(conn);
+return EXIT_SUCCESS;
+}
+
+//gcc -o clt codesys.c `mysql_config --cflags --libs` -std=c99 open62541.c
