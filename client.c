@@ -2,6 +2,7 @@
 #include <mysql.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <pthread.h>
 
 MYSQL *conn;
 
@@ -13,6 +14,35 @@ const char *database = "informatica";
 UA_Client *client;
 UA_StatusCode retval;
 
+pthread_mutex_t mtx_mysql;
+
+
+int opcua_connect_to_server(){
+    /* OPCUA Connect */
+    client = UA_Client_new();
+    UA_ClientConfig_setDefault(UA_Client_getConfig(client));
+    retval = UA_Client_connect(client, "opc.tcp://localhost:4840");
+    if(retval != UA_STATUSCODE_GOOD) {
+        UA_Client_delete(client);
+        printf("\n NAO CONECTOU! TEMOS PENA!\n");
+        return (int)retval;
+        } else{
+        printf("\n CONECTOU!!!!!!!!!!!!! \n");
+    }
+    return 0;
+}
+
+int database_start_connection(){
+    conn = mysql_init(NULL);
+    /* Connect to database */
+    if (!mysql_real_connect(conn, server, user, password, database, 0, NULL, 0)) {
+        fprintf(stderr, "%s\n", mysql_error(conn));
+        exit(1);
+    } else {
+        printf("Conectado com base de dados MySQL");
+    }
+    return 0;
+}
 
 int* write_flag(int *arr){
     MYSQL_RES *res;
@@ -96,36 +126,40 @@ int check_all_zeros(int param[], int size){
             return 0;
 }
 
-int main(){
-
-    /* OPCUA Connect */
-    client = UA_Client_new();
-    UA_ClientConfig_setDefault(UA_Client_getConfig(client));
-    retval = UA_Client_connect(client, "opc.tcp://localhost:4840");
-    if(retval != UA_STATUSCODE_GOOD) {
-        UA_Client_delete(client);
-        printf("\n NAO CONECTOU! TEMOS PENA!\n");
-        return (int)retval;
-        } else{
-        printf("\n CONECTOU!!!!!!!!!!!!! \n");
-    }
-
-    conn = mysql_init(NULL);
-
-    /* Connect to database */
-    if (!mysql_real_connect(conn, server, user, password, database, 0, NULL, 0)) {
-        fprintf(stderr, "%s\n", mysql_error(conn));
-        exit(1);
-    } else {
-        printf("Conectado com base de dados MySQL");
-    }
+int send_values_to_db(int table_id, int param[],int size, int flag_value){
+    switch (table_id)
+    {
+    case 4:
+        for(int i=0; i<size;i++){
+            int column[] = {12, 23, 34,45,56,59,67,68};
+            char query[150];
+            sprintf(query,"UPDATE `informatica`.`orders` SET"
+                        "`quantity` = '%d' WHERE `piece`='%d'",param[i],column[i]);
+            if(mysql_query(conn, query)){
+                fprintf(stderr,"%s\n",mysql_error(conn));
+                exit(1);
+            }
+            sprintf(query, "UPDATE `informatica`.`orders` SET" 
+                        "`quantity` = '%d' WHERE `piece`= '99'",flag_value);
+            if (mysql_query(conn, query)){
+                fprintf(stderr, "%s\n", mysql_error(conn));
+                exit(1);
+            }
+        }
+        break;
     
+    default:
+        printf("table '%d' not found", table_id);
+        break;
+    }
+}
+
+int start_orders(){
     int* data;
     int soma = 0;
     int arr[8];
 
-    while(1){
-        data = write_flag(arr);
+    data = write_flag(arr);
         for (int n=0; n<8; n++){
             printf("data[%d] --> %d\n", n, data[n]);
         }
@@ -147,9 +181,31 @@ int main(){
             for (int n=0; n<8; n++){
                 printf("r_values[%d] --> %d\n", n, r_values[n]);
             }
-            break;
+            send_values_to_db(4, r_values,sizeof(arr)/sizeof(int),0);
+            return 1;
         }
+    return 0;
+}
+
+void* orders_thread(){
+    while(1){
+        start_orders();
+    } 
+}
+
+int main(){
+    opcua_connect_to_server();
+    database_start_connection();
+    
+    pthread_t th1, th2;  //th1 --> orders thread ;;;  th2 --> unload thread ;;;
+    if(pthread_mutex_init(&mtx_mysql, NULL)!=0){
+        printf("ERROR CREATING MUTEX!");
+        exit(1);
     }
+
+    pthread_create(&th1, NULL, orders_thread, NULL);
+    pthread_join(th1,NULL);
+
     UA_Client_delete(client); /* Disconnects the client internally */
     mysql_close(conn);
     return EXIT_SUCCESS;
