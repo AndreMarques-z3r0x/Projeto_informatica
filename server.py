@@ -6,30 +6,6 @@ import random
 import threading
 import subprocess
 
-def request_stores_db():
-    return [1, 2, 3, 4, 5, 6, 7, 8, 9]
-
-def request_orders_db():
-    dic=[0,0,0]
-    for i in range(3):
-        dic[i]= {"nnn": i,
-                "from": i,
-                "to":i,
-                "quantity":i,
-                "quantity1":i,
-                "quantity2":i,
-                "quantity3":i,
-                "maxdelay":i,
-                "time":i,
-                "time1":i,
-                "max_delay":i,
-                "penalty":i,
-                "start":i,
-                "end":i,
-                "penalty_incurred":i,
-                "estado":i
-                }
-    return dic
 
 class com_erp:
     def __init__(self,host,port):
@@ -364,6 +340,7 @@ class manager:
         self.transf = db.insert_incr(self.inc[1:9])
         mutex.release()
         print('QUALQUER COISA EM CAPS LOCK: !! ' , self.transf)
+
 def loop_man():
     while 1:
         if lista_ordens_pendentes!=[] or lista_ordens_correntes!=[] or sum(man.transf)!=0:
