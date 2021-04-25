@@ -154,24 +154,24 @@ class ordem:
 class descarga:
     def __init__(self,mensagem):
         self.estado=0
-        self.a=['','P1','P2','P3','P4','P5','P6','P7','P8','P9']
         for desc in mensagem:
             self.number=int(mensagem.attrib["Number"])
             self.tipo=desc.attrib["Type"]
-            self.tipo_n=self.a.index(self.tipo)
-
             self.destino=desc.attrib["Destination"]
             self.quantity=int(desc.attrib["Quantity"])
-        dic={"nnn":self.number,"type":self.tipo,"destination":self.destino,"quantity":self.quantity,'estado':self.estado}
-        mutex.acquire()
-        db.insert_order_db('unload', dic)
-        mutex.release()
+            
+        self.atualizar_descarga_db()
         self.print_info()
     def print_info(self):
         print('number= ',self.number)
         print('tipo= ',self.tipo)
         print('destino= ',self.destino)
         print('quantity= ',self.quantity)
+    def atualizar_descarga_db(self):
+        dic={"nnn":self.number,"type":self.tipo,"destination":self.destino,"quantity":self.quantity,'estado':self.estado}
+        mutex.acquire()
+        db.insert_order_db('unload', dic)
+        mutex.release()
 
 class manager:
     def __init__(self) :
@@ -196,56 +196,54 @@ class manager:
                     self.d1=1;
                     lista_descargas_correntes.append(desc)
                     self.p1=desc
-                    a=[0,0,0,0,0,0,0,0,0,0,1]
-                    a[desc.tipo_n]=desc.quantity
-                    self.teste_escrever_descargas({'unload1':a})
+                    self.teste_escrever_descargas({'destination':'1','type':desc.destino[1:],'quantity':self.quantity,'99':1})
                     lista_descargas_pendentes.pop(i)
                     print('descargas correntes=',len(lista_descargas_correntes))
                 elif desc.destino =='P2' and self.d2==0:
                     self.d2=1;
                     lista_descargas_correntes.append(desc)
                     self.p2=desc
-
-                    a=[0,0,0,0,0,0,0,0,0,0,1]
                     a[desc.tipo_n]=desc.quantity
-                    self.teste_escrever_descargas({'unload2':a})
+                    self.teste_escrever_descargas({'destination':'2','type':desc.destino[1:],'quantity':self.quantity,'99':1})
                     lista_descargas_pendentes.pop(i)
                     print('descargas correntes=',len(lista_descargas_correntes))
                 elif desc.destino =='P3' and self.d3==0:
                     self.d3=1;
                     lista_descargas_correntes.append(desc)
                     self.p3=desc
-
-                    a=[0,0,0,0,0,0,0,0,0,0,1]
-                    a[desc.tipo_n]=desc.quantity
-                    self.teste_escrever_descargas({'unload3':a})
+                    self.teste_escrever_descargas({'destination':'3','type':desc.destino[1:],'quantity':self.quantity,'99':1})
                     lista_descargas_pendentes.pop(i)
                     print('descargas correntes=',len(lista_descargas_correntes))
                 i=i+1
 
-                dic=self.teste_ler_descargas()
-                if self.d1==1:
-                    if dic['unload1'][10]==0:
-                        lista_descargas_feitas.append(self.p1)
-                        print('descargas feitas=',len(lista_descargas_feitas))
-                        self.d1=0
-                if self.d2==1:
-                    if dic['unload2'][10]==0:
-                        lista_descargas_feitas.append(self.p2)
-                        print('descargas feitas=',len(lista_descargas_feitas))
-                        self.d2=0
-                if self.d3==1:
-                    if dic['unload3'][10]==0:
-                        lista_descargas_feitas.append(self.p3)
-                        print('descargas feitas=',len(lista_descargas_feitas))
-                        self.d3=0
+            dic=self.teste_ler_descargas()
+            if self.d1==1:
+                if dic[0]==0:
+                    self.p1.estado=1
+                    self.p1.atualizar_descarga_db()
+                    lista_descargas_feitas.append(self.p1)
+                    print('descargas feitas=',len(lista_descargas_feitas))
+                    self.d1=0
+            if self.d2==1:
+                if dic[1]==0:
+                    self.p2.estado=1
+                    self.p2.atualizar_descarga_db()
+                    lista_descargas_feitas.append(self.p2)
+                    print('descargas feitas=',len(lista_descargas_feitas))
+                    self.d2=0
+            if self.d3==1:
+                if dic[2]==0:
+                    self.p3.estado=1
+                    self.p3.atualizar_descarga_db()
+                    lista_descargas_feitas.append(self.p3)
+                    print('descargas feitas=',len(lista_descargas_feitas))
+                    self.d3=0
 
     def teste_escrever_descargas(self,dic):
-        #print(dic)
         return 1
 
     def teste_ler_descargas(self):
-        return {'unload1':[0,0,0,0,0,0,0,0,0,0,0],'unload2':[0,0,0,0,0,0,0,0,0,0,0],'unload3':[0,0,0,0,0,0,0,0,0,0,0]}
+        return [0,0,0]
 
 
     def teste_ler_var(self,valor):
@@ -369,7 +367,6 @@ manager_t.start()
 #subprocess.run(["bash", "insert.sh"])
 
 if __name__ == '__main__':
-
     while 1:
         msg,addr=erp.read_msg_udp()
         erp.parse_info(msg,addr)
