@@ -160,7 +160,10 @@ class descarga:
             self.destino=desc.attrib["Destination"]
             self.quantity=int(desc.attrib["Quantity"])
             
-        self.atualizar_descarga_db()
+        dic={"nnn":self.number,"type":self.tipo,"destination":self.destino,"quantity":self.quantity,'estado':self.estado}
+        mutex.acquire()
+        db.insert_order_db('unload', dic)
+        mutex.release()
         self.print_info()
     def print_info(self):
         print('number= ',self.number)
@@ -170,7 +173,7 @@ class descarga:
     def atualizar_descarga_db(self):
         dic={"nnn":self.number,"type":self.tipo,"destination":self.destino,"quantity":self.quantity,'estado':self.estado}
         mutex.acquire()
-        db.insert_order_db('unload', dic)
+        db.update_order_db('unload', dic)
         mutex.release()
 
 class manager:
@@ -196,7 +199,10 @@ class manager:
                     self.d1=1;
                     lista_descargas_correntes.append(desc)
                     self.p1=desc
-                    self.teste_escrever_descargas({'destination':'1','type':desc.destino[1:],'quantity':self.quantity,'99':1})
+                    mutex.acquire()
+                    print("REEEEEEEEEEE JONAS GAYY REEEEEEEEEE!!!!!!!!!!!")
+                    db.update_order_db('unload_plc', {'destination':'1','type':desc.destino[1:],'quantity':desc.quantity,'99':1})
+                    mutex.release()
                     lista_descargas_pendentes.pop(i)
                     print('descargas correntes=',len(lista_descargas_correntes))
                 elif desc.destino =='P2' and self.d2==0:
@@ -204,43 +210,53 @@ class manager:
                     lista_descargas_correntes.append(desc)
                     self.p2=desc
                     a[desc.tipo_n]=desc.quantity
-                    self.teste_escrever_descargas({'destination':'2','type':desc.destino[1:],'quantity':self.quantity,'99':1})
+                    mutex.acquire()
+                    db.update_order_db('unload_plc', {'destination':'2','type':desc.destino[1:],'quantity':desc.quantity,'99':1})
+                    mutex.release()
                     lista_descargas_pendentes.pop(i)
                     print('descargas correntes=',len(lista_descargas_correntes))
                 elif desc.destino =='P3' and self.d3==0:
                     self.d3=1;
                     lista_descargas_correntes.append(desc)
                     self.p3=desc
-                    self.teste_escrever_descargas({'destination':'3','type':desc.destino[1:],'quantity':self.quantity,'99':1})
+                    mutex.acquire()
+                    db.update_order_db('unload_plc', {'destination':'3','type':desc.destino[1:],'quantity':desc.quantity,'99':1})
+                    mutex.release()
                     lista_descargas_pendentes.pop(i)
                     print('descargas correntes=',len(lista_descargas_correntes))
                 i=i+1
 
-            dic=self.teste_ler_descargas()
-            if self.d1==1:
-                if dic[0]==0:
-                    self.p1.estado=1
-                    self.p1.atualizar_descarga_db()
-                    lista_descargas_feitas.append(self.p1)
-                    print('descargas feitas=',len(lista_descargas_feitas))
-                    self.d1=0
-            if self.d2==1:
-                if dic[1]==0:
-                    self.p2.estado=1
-                    self.p2.atualizar_descarga_db()
-                    lista_descargas_feitas.append(self.p2)
-                    print('descargas feitas=',len(lista_descargas_feitas))
-                    self.d2=0
-            if self.d3==1:
-                if dic[2]==0:
-                    self.p3.estado=1
-                    self.p3.atualizar_descarga_db()
-                    lista_descargas_feitas.append(self.p3)
-                    print('descargas feitas=',len(lista_descargas_feitas))
-                    self.d3=0
-
-    def teste_escrever_descargas(self,dic):
-        return 1
+        if self.d1==1:
+            mutex.acquire()
+            dic=db.read_unload_plc_state()
+            mutex.release()
+            print(dic,"DIC DIC DIC DIC DIC DIC")
+            if dic[0]==0:
+                self.p1.estado=1
+                self.p1.atualizar_descarga_db()
+                lista_descargas_feitas.append(self.p1)
+                print('descargas feitas=',len(lista_descargas_feitas))
+                self.d1=0
+        if self.d2==1:
+            mutex.acquire()
+            dic=db.read_unload_plc_state()
+            mutex.release()
+            if dic[1]==0:
+                self.p2.estado=1
+                self.p2.atualizar_descarga_db()
+                lista_descargas_feitas.append(self.p2)
+                print('descargas feitas=',len(lista_descargas_feitas))
+                self.d2=0
+        if self.d3==1:
+            mutex.acquire()
+            dic=db.read_unload_plc_state()
+            mutex.release()
+            if dic[2]==0:
+                self.p3.estado=1
+                self.p3.atualizar_descarga_db()
+                lista_descargas_feitas.append(self.p3)
+                print('descargas feitas=',len(lista_descargas_feitas))
+                self.d3=0
 
     def teste_ler_descargas(self):
         return [0,0,0]

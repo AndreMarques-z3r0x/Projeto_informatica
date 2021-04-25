@@ -129,7 +129,7 @@ class DataBase:
         except ValueError:
             print('Error while passing data')
             return 1
-        if table == 'transform' or table == 'unload':
+        if table == 'transform' or table == 'unload' or table == 'unload_plc':
             for i in range(__columns.__len__()):
                 if __columns[i] != 'nnn' and __columns[i] != 'piece':
                     if __columns[i] in ('from', 'to', 'type', 'destination'):
@@ -142,10 +142,28 @@ class DataBase:
                 __query += " WHERE (`nnn` = " + str(data['nnn']) + ");"
             elif __columns[0] == 'piece':
                 __query += " WHERE (`piece` = " + str(data['piece']) + ");"
+            elif __columns[0] == 'destination':
+                __query += " WHERE (`destination` = " + str(data['destination']) + ");"
             print(__query)
             __cursor.execute(__query)
             self.mysqldb.commit()
         return 0
+
+    def read_unload_plc_state(self):
+        __cursor = self.mysqldb.cursor()
+        __query = 'Select `99` from `informatica`.`unload_plc`;'
+        __state = []
+        try:
+            __cursor.execute(__query)
+            for __row in __cursor.fetchall():
+                __state.append(__row[0])
+            __cursor.close()
+            self.mysqldb.commit()
+        except mysql.connector.Error as err:
+            print("Something went wrong: {}".format(err))
+            return 1
+        return __state
+
 
     def clear_db_tables(self):
         __query = "DELETE FROM transform;"
@@ -212,27 +230,30 @@ def main():
         'penalty_incurred': 0,
         'estado': 0,
     }
-    print(info)
+    #print(info)
     info2 = {
         'nnn': 2,
         'type': 'P1',
         'destination': 'P3',
         'quantity': 5,
         'estado': 0,
+        '99': 1,
     }
     #ret = db.insert_order_db('transform', info)
     information = {
         'piece': 'P12',
         'quantity': 90,
     }
-    dt = [5,0,0,0,0,0,0,0]
-    print(db.insert_incr(dt))
-    dt = [2,0,0,0,0,0,0,0]
-    print(db.insert_incr(dt))
-    #db.insert_order_db('stores', information)
+    while(1):
+        print(db.read_unload_plc_state())
+    #dt = [5,0,0,0,0,0,0,0]
+    #print(db.insert_incr(dt))
+    #dt = [2,0,0,0,0,0,0,0]
+    #print(db.insert_incr(dt))
+    #db.insert_order_db('unload', info2)
     #orders = db.request_orders_db('transform')
     #db.update_order_db("transform", information)
-    db.clear_db_tables()
+    #db.clear_db_tables()
 
 if __name__ == '__main__':
     main()

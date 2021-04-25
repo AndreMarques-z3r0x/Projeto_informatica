@@ -44,14 +44,70 @@ int database_start_connection(){
     return 0;
 }
 
-int* write_flag(int *arr){
+int write_unload_values(int param[]){
+
+}
+
+int* write_flag(int *arr, int act){          //act=0 --> orders           act=1 --> unloads
     MYSQL_RES *res;
     MYSQL_ROW row;
 
+    switch (act)
+    {
+    case 0:
+        pthread_mutex_lock(&mtx_mysql);
+        if(mysql_query(conn, "Select * from informatica.orders")){
+            fprintf(stderr, "%s\n", mysql_error(conn));
+            exit(1);
+        }
+        pthread_mutex_unlock(&mtx_mysql);
+        res = mysql_use_result(conn);
+        int i = 0;
+        while((row = mysql_fetch_row(res)) != NULL){
+            arr[i] = (int)strtol(row[1],(char **)NULL,10);
+            printf ("\nValor da base de dados:\n arr[%d] --> %d ", i, arr[i]);
+            i++;
+        }
+        mysql_free_result(res);
+        break;
+    
+    case 1:
+        pthread_mutex_lock(&mtx_mysql);
+        if(mysql_query(conn, "Select * from informatica.unload_plc")){
+            fprintf(stderr, "%s\n", mysql_error(conn));
+            exit(1);
+        }
+        pthread_mutex_unlock(&mtx_mysql);
+        res = mysql_use_result(conn);
+        int i = 0;
+        while((row = mysql_fetch_row(res)) != NULL){
+            int flag_state = (int)strtol(row[3],(char **)NULL,10);
+            printf ("\nValor da flag na base de dados:\n flag_state --> %d ", flag_state);
+            if (flag_state)
+            {
+                int aux[4];
+                for(int n=0; n<4; n++){
+                    aux[n] = (int)strtol(row[n],(char **)NULL,10);
+                    printf("Valores da ordem unload na db: \n aux[%d] --> %d \n", n , aux[n]);
+                }
+                write_unload_values(aux);
+            }
+            
+            i++;
+        }
+        mysql_free_result(res);
+        break;
+
+    default:
+        printf("404: Action not recognized!");
+        break;
+    }
+    /*pthread_mutex_lock(&mtx_mysql);
     if(mysql_query(conn, "Select * from informatica.orders")){
         fprintf(stderr, "%s\n", mysql_error(conn));
         exit(1);
     }
+    pthread_mutex_unlock(&mtx_mysql);
     res = mysql_use_result(conn);
     int i = 0;
     while((row = mysql_fetch_row(res)) != NULL){
@@ -59,7 +115,7 @@ int* write_flag(int *arr){
         printf ("\nValor da base de dados:\n arr[%d] --> %d ", i, arr[i]);
         i++;
     }
-    mysql_free_result(res);
+    mysql_free_result(res); */
 
     return arr;
 }
@@ -135,6 +191,7 @@ int send_values_to_db(int table_id, int param[],int size, int flag_value){
             char query[150];
             sprintf(query,"UPDATE `informatica`.`orders` SET"
                         "`quantity` = '%d' WHERE `piece`='%d'",param[i],column[i]);
+            pthread_mutex_lock(&mtx_mysql);
             if(mysql_query(conn, query)){
                 fprintf(stderr,"%s\n",mysql_error(conn));
                 exit(1);
@@ -145,6 +202,7 @@ int send_values_to_db(int table_id, int param[],int size, int flag_value){
                 fprintf(stderr, "%s\n", mysql_error(conn));
                 exit(1);
             }
+            pthread_mutex_unlock(&mtx_mysql);
         }
         break;
     
@@ -193,6 +251,12 @@ void* orders_thread(){
     } 
 }
 
+void* unloads_thread(){
+    while(1){
+        start_unloads();
+    }
+}
+
 int main(){
     opcua_connect_to_server();
     database_start_connection();
@@ -204,7 +268,10 @@ int main(){
     }
 
     pthread_create(&th1, NULL, orders_thread, NULL);
+    pthread_create(&th2, NULL, unloads_thread, NULL);
+
     pthread_join(th1,NULL);
+    pthread_join(th2,NULL);
 
     UA_Client_delete(client); /* Disconnects the client internally */
     mysql_close(conn);
