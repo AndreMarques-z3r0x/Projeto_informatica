@@ -159,7 +159,7 @@ class descarga:
             self.tipo=desc.attrib["Type"]
             self.destino=desc.attrib["Destination"]
             self.quantity=int(desc.attrib["Quantity"])
-            
+
         dic={"nnn":self.number,"type":self.tipo,"destination":self.destino,"quantity":self.quantity,'estado':self.estado}
         mutex.acquire()
         db.insert_order_db('unload', dic)
@@ -188,6 +188,7 @@ class manager:
         self.d2=0;
         self.d3=0;
 
+        self.p=[0,'P1','P2','P3','P4','P5','P6','P7','P8','P9']
 
 
     def loop_descaargas(self):
@@ -196,41 +197,44 @@ class manager:
             i=0
             for desc in lista_descargas_pendentes:
                 if desc.destino =='P1' and self.d1==0:
-                    self.d1=1;
-                    lista_descargas_correntes.append(desc)
-                    self.p1=desc
-                    mutex.acquire()
-                    print("REEEEEEEEEEE JONAS GAYY REEEEEEEEEE!!!!!!!!!!!")
-                    db.update_order_db('unload_plc', {'destination':'1','type':desc.destino[1:],'quantity':desc.quantity,'99':1})
-                    mutex.release()
-                    lista_descargas_pendentes.pop(i)
-                    print('descargas correntes=',len(lista_descargas_correntes))
+                    if desc.quantity<stock[self.p.index(desc.destino)]:
+                        self.d1=1;
+                        lista_descargas_correntes.append(desc)
+                        self.p1=desc
+                        mutex.acquire()
+                        db.update_order_db('unload_plc', {'destination':'1','type':desc.destino[1:],'quantity':desc.quantity,'99':1})
+                        mutex.release()
+                        lista_descargas_pendentes.pop(i)
+                        print('descargas correntes=',len(lista_descargas_correntes))
+                    else:
+                        print('NAO TENHO STOCK, NEXT')
                 elif desc.destino =='P2' and self.d2==0:
-                    self.d2=1;
-                    lista_descargas_correntes.append(desc)
-                    self.p2=desc
-                    a[desc.tipo_n]=desc.quantity
-                    mutex.acquire()
-                    db.update_order_db('unload_plc', {'destination':'2','type':desc.destino[1:],'quantity':desc.quantity,'99':1})
-                    mutex.release()
-                    lista_descargas_pendentes.pop(i)
-                    print('descargas correntes=',len(lista_descargas_correntes))
+                    if desc.quantity<stock[self.p.index(desc.destino)]:
+                        self.d2=1;
+                        lista_descargas_correntes.append(desc)
+                        self.p2=desc
+                        a[desc.tipo_n]=desc.quantity
+                        mutex.acquire()
+                        db.update_order_db('unload_plc', {'destination':'2','type':desc.destino[1:],'quantity':desc.quantity,'99':1})
+                        mutex.release()
+                        lista_descargas_pendentes.pop(i)
+                        print('descargas correntes=',len(lista_descargas_correntes))
                 elif desc.destino =='P3' and self.d3==0:
-                    self.d3=1;
-                    lista_descargas_correntes.append(desc)
-                    self.p3=desc
-                    mutex.acquire()
-                    db.update_order_db('unload_plc', {'destination':'3','type':desc.destino[1:],'quantity':desc.quantity,'99':1})
-                    mutex.release()
-                    lista_descargas_pendentes.pop(i)
-                    print('descargas correntes=',len(lista_descargas_correntes))
+                    if desc.quantity<stock[self.p.index(desc.destino)]:
+                        self.d3=1;
+                        lista_descargas_correntes.append(desc)
+                        self.p3=desc
+                        mutex.acquire()
+                        db.update_order_db('unload_plc', {'destination':'3','type':desc.destino[1:],'quantity':desc.quantity,'99':1})
+                        mutex.release()
+                        lista_descargas_pendentes.pop(i)
+                        print('descargas correntes=',len(lista_descargas_correntes))
                 i=i+1
 
         if self.d1==1:
             mutex.acquire()
             dic=db.read_unload_plc_state()
             mutex.release()
-            print(dic,"DIC DIC DIC DIC DIC DIC")
             if dic[0]==0:
                 self.p1.estado=1
                 self.p1.atualizar_descarga_db()
@@ -374,6 +378,7 @@ lista_descargas_pendentes=[]
 lista_descargas_correntes=[]
 lista_descargas_feitas=[]
 
+stock=[0,400,40,20,20,20,20,0,0,0]
 db = DataBase("dbConfig.txt")
 db.clear_db_tables()
 man=manager()
