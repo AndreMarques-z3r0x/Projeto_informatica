@@ -195,7 +195,9 @@ class Ui_ERP(object):
         #msg='<Order Number="{}"><Unload Type="{}" Destination="{}" Quantity="{}"/></Order>'.format(self.stype_2.value(),self.p[self.stype.value()],self.p[self.sdestination.value()],self.squantity2.value())
         msg='<Order Number="{}"><Unload Type="{}" Destination="{}" Quantity="{}"/></Order>'.format(self.idd,self.p[self.stype.value()],self.p[self.sdestination.value()],self.squantity2.value())
         self.clt.sendto(msg.encode('utf-8'),(self.HOST,self.PORT))
-        text='id={} \nType={} \nDestination={} \nQuantity={}'.format(self.stype_2.value(),self.p[self.stype.value()],self.p[self.sdestination.value()],self.squantity2.value())
+
+        #text='id={} \nType={} \nDestination={} \nQuantity={}'.format(self.stype_2.value(),self.p[self.stype.value()],self.p[self.sdestination.value()],self.squantity2.value())
+        text='id={} \nType={} \nDestination={} \nQuantity={}'.format(self.idd,self.p[self.stype.value()],self.p[self.sdestination.value()],self.squantity2.value())
         self.lmsgdescarga.setText(text)
         self.lmsgdescarga.adjustSize()
 
