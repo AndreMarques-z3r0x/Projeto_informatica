@@ -172,6 +172,7 @@ class Ui_ERP(object):
     def metodos(self):
         self.p=['','P1','P2','P3','P4','P5','P6','P7','P8','P9']
         self.id=0
+        self.idd=0
         self.HOST='localhost'
         self.PORT=54321
         self.clt = socket(AF_INET,SOCK_DGRAM)
@@ -190,7 +191,9 @@ class Ui_ERP(object):
         self.lmsgordem.adjustSize()
 
     def send_descarga(self):
-        msg='<Order Number="{}"><Unload Type="{}" Destination="{}" Quantity="{}"/></Order>'.format(self.stype_2.value(),self.p[self.stype.value()],self.p[self.sdestination.value()],self.squantity2.value())
+        self.idd=self.idd+1
+        #msg='<Order Number="{}"><Unload Type="{}" Destination="{}" Quantity="{}"/></Order>'.format(self.stype_2.value(),self.p[self.stype.value()],self.p[self.sdestination.value()],self.squantity2.value())
+        msg='<Order Number="{}"><Unload Type="{}" Destination="{}" Quantity="{}"/></Order>'.format(self.idd,self.p[self.stype.value()],self.p[self.sdestination.value()],self.squantity2.value())
         self.clt.sendto(msg.encode('utf-8'),(self.HOST,self.PORT))
         text='id={} \nType={} \nDestination={} \nQuantity={}'.format(self.stype_2.value(),self.p[self.stype.value()],self.p[self.sdestination.value()],self.squantity2.value())
         self.lmsgdescarga.setText(text)
