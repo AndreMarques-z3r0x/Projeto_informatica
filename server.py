@@ -446,6 +446,7 @@ class manager:
         mutex.release()
         print('QUALQUER COISA EM CAPS LOCK: !! ' , self.transf)
 
+
 def loop_man():
     while 1:
         if lista_ordens_pendentes!=[] or lista_ordens_correntes!=[] or sum(man.transf)!=0:
