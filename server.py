@@ -357,17 +357,14 @@ class manager:
         print('self=', self.temp)
         self.temp=[0,0,0,0,0,0,0,0,0,0]
         self.temp=self.transf.copy()
-        self.teste_ler_var(2)
+        #self.teste_ler_var(2)
         diference=np.subtract(self.temp,self.transf)
-
-        print('DIFERENCE->',diference)
-        print('----------')
-
-        '''
         mutex.acquire()
         self.transf = db.insert_incr(self.inc[1:9])
         mutex.release()
-        '''
+
+        print('DIFERENCE->',diference)
+        print('----------')
 
     def loop(self):
 
