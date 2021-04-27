@@ -1,6 +1,6 @@
 import mysql.connector
 from mysql.connector import errorcode
-
+import socket
 
 class DataBase:
     def __init__(self, filename):
@@ -147,6 +147,9 @@ class DataBase:
             print(__query)
             __cursor.execute(__query)
             self.mysqldb.commit()
+            if table == 'unload_plc':
+                message = "" + str(data['destination']) + "NewUnload"
+                socket_send_message(message)
         return 0
 
     def read_unload_plc_state(self):
@@ -192,6 +195,7 @@ class DataBase:
                 return 1
             __pointer += 1
         __cursor.close()
+        socket_send_message("1NewOrder")
         print("A Espera que fique zero!  ")
         while True:
             __cursor = self.mysqldb.cursor()
@@ -209,6 +213,19 @@ class DataBase:
             self.mysqldb.commit()
             __cursor.close()
         return [0]+__teste[:-1]
+
+
+def socket_send_message(message):
+        host = socket.gethostname()  
+        port = 4455 
+        client_socket = socket.socket()  
+        client_socket.connect((host, port)) 
+        client_socket.send(message.encode())  
+        data = client_socket.recv(1024).decode()  
+        print('Received from server: ' + data) 
+        client_socket.close()
+        return 0
+
 
 def main():
     db = DataBase("dbConfig.txt")
@@ -232,28 +249,26 @@ def main():
     }
     #print(info)
     info2 = {
-        'nnn': 2,
-        'type': 'P1',
-        'destination': 'P3',
-        'quantity': 5,
-        'estado': 0,
-        '99': 1,
+        'destination': '1',
+        'type': '1',
+        'quantity': '0',
+        '99': '1',
     }
     #ret = db.insert_order_db('transform', info)
     information = {
         'piece': 'P12',
         'quantity': 90,
     }
-    while(1):
-        print(db.read_unload_plc_state())
-    #dt = [5,0,0,0,0,0,0,0]
-    #print(db.insert_incr(dt))
+    #print(db.read_unload_plc_state())
+    dt = [5,0,0,0,0,0,0,0]
+    print(db.insert_incr(dt))
     #dt = [2,0,0,0,0,0,0,0]
     #print(db.insert_incr(dt))
     #db.insert_order_db('unload', info2)
     #orders = db.request_orders_db('transform')
-    #db.update_order_db("transform", information)
+    #db.update_order_db("unload_plc", info2)
     #db.clear_db_tables()
+    return 0
 
 if __name__ == '__main__':
     main()
