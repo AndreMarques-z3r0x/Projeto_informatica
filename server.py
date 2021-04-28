@@ -142,7 +142,9 @@ class ordem:
             if i<5:
                 self.transf[i]=self.quantity
             else: break
-        self.falta=self.transf
+        self.falta=self.transf.copy() #TESTE FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        self.falta_mesmo=self.transf.copy()
+        #self.falta=self.transf
         self.t1=self.transf[1]+self.transf[4]+self.transf[8]
         self.t2=self.transf[2]+self.transf[5]
         self.t3=self.transf[3]+self.transf[6]+self.transf[7]
@@ -263,15 +265,12 @@ class manager:
                 self.d3=0
     def teste_ler_descargas(self):
         return [0,0,0]
-
-
     def teste_ler_var(self,valor):
         for i in range(1,9):
             if self.transf[i]>valor+1:
                 self.transf[i]=self.transf[i]-random.randrange(valor)
             else:
                 self.transf[i]=0
-
     def sort_order(self,lista):
         for l in lista:
             l.tempo_atual()
@@ -280,8 +279,112 @@ class manager:
             print('sort- ',l.number)
         return lista
 
+
+    def check_order_finish(self,dif):
+        for pedido in lista_ordens_correntes:
+            for s in range(1,9):
+                if dif[s]>0:
+                    if pedido.falta_mesmo[s]>0:
+                        pedido.falta_mesmo[s]-=dif[s]
+                        dif[s]=0
+                        if pedido.falta_mesmo[s]<0:
+                            dif[s]=pedido.falta_mesmo[s]*(-1)
+                            pedido.falta_mesmo[s]=0
+
+
+
+
+
     def loop_teste(self):
 
+
+        self.inc=[0,0,0,0,0,0,0,0,0]
+        self.t1=self.transf[1]+self.transf[4]+self.transf[8]
+        self.t2=self.transf[2]+self.transf[5]
+        self.t3=self.transf[3]+self.transf[6]+self.transf[7]
+
+        if self.t1!=self.buffer or self.buffer or self.t3!=self.buffer:
+             f1=self.buffer-self.t1
+             f2=self.buffer-self.t2
+             f3=self.buffer-self.t3
+
+             for pedido in lista_ordens_correntes:
+                if f1>0:
+                    for j in [1,4,8]:
+                        if f1>0:
+                            if pedido.falta[j]>0:
+                                pedido.falta[j]=pedido.falta[j]-f1
+                                self.transf[j]=self.transf[j]+f1
+                                self.inc[j]=self.inc[j]+f1
+                                f1=0
+                                if pedido.falta[j]<0:
+                                    f1=pedido.falta[j]*(-1)
+                                    pedido.falta[j]=0
+                                    self.transf[j]=self.transf[j]-f1
+                                    self.inc[j]=self.inc[j]-f1
+                if f2>0:
+                    for j in [2,5]:
+                        if pedido.falta[j]>0:
+                            pedido.falta[j]=pedido.falta[j]-f2
+                            self.transf[j]=self.transf[j]+f2
+                            self.inc[j]=self.inc[j]+f2
+                            f2=0
+                            if pedido.falta[j]<0:
+                                f2=pedido.falta[j]*(-1)
+                                pedido.falta[j]=0
+                                self.transf[j]=self.transf[j]-f2
+                                self.inc[j]=self.inc[j]-f2
+                if f3>0:
+                    for j in [3,6,7]:
+                        if pedido.falta[j]>0:
+                            pedido.falta[j]=pedido.falta[j]-f3
+                            self.transf[j]=self.transf[j]+f3
+                            self.inc[j]=self.inc[j]+f3
+                            f3=0
+                            if pedido.falta[j]<0:
+                                f3=pedido.falta[j]*(-1)
+                                pedido.falta[j]=0
+                                self.transf[j]=self.transf[j]-f3
+                                self.inc[j]=self.inc[j]-f3
+
+
+             if (f1>0 or f2>0 or f3>0)and lista_ordens_pendentes!=[]:
+                stock[self.p.index(lista_ordens_pendentes[0].fro)]-=lista_ordens_pendentes[0].quantity
+
+                lista_ordens_correntes.append(lista_ordens_pendentes.pop(0))
+
+        j=0
+
+
+
+        print('inc=', self.inc)
+
+        self.temp=[0,0,0,0,0,0,0,0,0,0]
+        self.temp=self.transf.copy()
+        print('self=', self.temp)
+        self.teste_ler_var(2)
+        diference=np.subtract(self.temp,self.transf)
+
+        '''
+        mutex.acquire()
+        self.transf = db.insert_incr(self.inc[1:9])
+        mutex.release()
+        '''
+        print('DIFERENCE->',diference)
+
+        self.check_order_finish(diference)
+        for i in lista_ordens_correntes:
+            print('falta=', i.falta)
+            print('falta mesmo=', i.falta_mesmo)
+            if sum(i.falta_mesmo)==0:
+                print('pop ',i.falta_mesmo)
+                stock[self.p.index(i.to)]+=i.quantity
+                lista_ordens_feitas.append(lista_ordens_correntes.pop(j))
+            j=j+1
+        print('----------')
+
+
+    def loop(self):
 
         self.inc=[0,0,0,0,0,0,0,0,0]
         self.t1=self.transf[1]+self.transf[4]+self.transf[8]
@@ -365,87 +468,6 @@ class manager:
 
         print('DIFERENCE->',diference)
         print('----------')
-
-    def loop(self):
-
-        #self.teste_ler_var(2)
-        self.inc=[0,0,0,0,0,0,0,0,0]
-        self.t1=self.transf[1]+self.transf[4]+self.transf[8]
-        self.t2=self.transf[2]+self.transf[5]
-        self.t3=self.transf[3]+self.transf[6]+self.transf[7]
-        print('f1= {},f2= {},f3 == {}'.format(self.t1,self.t2,self.t3))
-        if self.t1!=5 or self.t2!=5 or self.t3!=55:
-
-             f1=5-self.t1
-             f2=5-self.t2
-             f3=5-self.t3
-             print('calc-f1= {},f2= {},f3 == {}'.format(f1,f2,f3))
-             for pedido in lista_ordens_correntes:
-                if f1>0:
-                    for j in [1,4,8]:
-                        if f1>0:
-                            if pedido.falta[j]>0:
-                                pedido.falta[j]=pedido.falta[j]-f1
-                                self.transf[j]=self.transf[j]+f1
-                                self.inc[j]=self.inc[j]+f1
-                                f1=0
-                                if pedido.falta[j]<0:
-                                    f1=pedido.falta[j]*(-1)
-                                    pedido.falta[j]=0
-                                    self.transf[j]=self.transf[j]-f1
-                                    self.inc[j]=self.inc[j]-f1
-                                if pedido.falta[j]>0:
-                                    f1=0
-                if f2>0:
-                    for j in [2,5]:
-                        if pedido.falta[j]>0:
-                            pedido.falta[j]=pedido.falta[j]-f2
-                            self.transf[j]=self.transf[j]+f2
-                            self.inc[j]=self.inc[j]+f2
-                            f2=0
-                            if pedido.falta[j]<0:
-                                f2=pedido.falta[j]*(-1)
-                                pedido.falta[j]=0
-                                self.transf[j]=self.transf[j]-f2
-                                self.inc[j]=self.inc[j]-f2
-                            if pedido.falta[j]>0:
-                                f2=0
-                if f3>0:
-                    for j in [3,6,7]:
-                        if pedido.falta[j]>0:
-                            pedido.falta[j]=pedido.falta[j]-f3
-                            self.transf[j]=self.transf[j]+f3
-                            self.inc[j]=self.inc[j]+f3
-                            f3=0
-                            if pedido.falta[j]<0:
-                                f3=pedido.falta[j]*(-1)
-                                pedido.falta[j]=0
-                                self.transf[j]=self.transf[j]-f3
-                                self.inc[j]=self.inc[j]-f3
-                            if pedido.falta[j]>0:
-                                f3=0
-
-             if (f1>0 or f2>0 or f3>0)and lista_ordens_pendentes!=[]:
-                lista_ordens_correntes.append(lista_ordens_pendentes.pop(0))
-        print('fim-f1= {},f2= {},f3 == {}'.format(f1,f2,f3))
-        j=0
-        for i in lista_ordens_correntes:
-            if sum(i.falta)==0:
-                print('pop ',i.falta)
-                lista_ordens_feitas.append(lista_ordens_correntes.pop(j))
-            j=j+1
-
-            print('lista',i.falta)
-
-        print('self=',self.transf)
-        print('inc=', self.inc)
-        print('soma',sum(self.transf))
-        print('----------')
-        mutex.acquire()
-        self.transf = db.insert_incr(self.inc[1:9])
-        mutex.release()
-        print('QUALQUER COISA EM CAPS LOCK: !! ' , self.transf)
-
 
 def loop_man():
     while 1:
