@@ -15,7 +15,7 @@ import time
 class Ui_ERP(object):
     def setupUi(self, ERP):
         ERP.setObjectName("ERP")
-        ERP.resize(1546, 808)
+        ERP.resize(1546/3, 808) #1546 808
         self.centralwidget = QtWidgets.QWidget(ERP)
         self.centralwidget.setObjectName("centralwidget")
         self.groupBox = QtWidgets.QGroupBox(self.centralwidget)

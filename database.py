@@ -1,6 +1,7 @@
 import mysql.connector
 from mysql.connector import errorcode
 import socket
+import time
 
 class DataBase:
     def __init__(self, filename):
@@ -251,7 +252,7 @@ def main():
     info2 = {
         'destination': '1',
         'type': '1',
-        'quantity': '0',
+        'quantity': '5',
         '99': '1',
     }
     #ret = db.insert_order_db('transform', info)
@@ -260,13 +261,22 @@ def main():
         'quantity': 90,
     }
     #print(db.read_unload_plc_state())
-    dt = [5,0,0,0,0,0,0,0]
+    #dt = [0,0,0,0,0,0,0,0]
+    #ret = db.insert_incr(dt)
+    #print("Vetor de retorno",ret)
+    """
+    dt = [0,0,0,0,0,0,0,0]
+    ret = db.insert_incr(dt)
+    print("Vetor de retorno",ret)
+    dt = [0,5,0,0,0,0,0,0]
+    ret = db.insert_incr(dt)
+    print("Vetor de retorno",ret)
+    dt = [0,0,0,0,0,0,0,0]
     print(db.insert_incr(dt))
-    #dt = [2,0,0,0,0,0,0,0]
-    #print(db.insert_incr(dt))
+    """
     #db.insert_order_db('unload', info2)
     #orders = db.request_orders_db('transform')
-    #db.update_order_db("unload_plc", info2)
+    db.update_order_db("unload_plc", info2)
     #db.clear_db_tables()
     return 0
 

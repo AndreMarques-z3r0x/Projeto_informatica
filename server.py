@@ -351,14 +351,17 @@ class manager:
 
 
         print('inc=', self.inc)
-        print('self=', self.temp)
         self.temp=[0,0,0,0,0,0,0,0,0,0]
         self.temp=self.transf.copy()
+        print('self=', self.temp)
         #self.teste_ler_var(2)
-        diference=np.subtract(self.temp,self.transf)
         mutex.acquire()
-        self.transf = db.insert_incr(self.inc[1:9])
+        print('self ANTES->.',  self.transf)
+        x = db.insert_incr(self.inc[1:9])
+        self.transf=x.copy()
+        print('self depois->.',  self.transf)
         mutex.release()
+        diference=np.subtract(self.temp,self.transf)
 
         print('DIFERENCE->',diference)
         print('----------')
@@ -439,7 +442,8 @@ class manager:
         print('soma',sum(self.transf))
         print('----------')
         mutex.acquire()
-        self.transf = db.insert_incr(self.inc[1:9])
+        x = db.insert_incr(self.inc[1:9])
+        self.transf=x.copy()
         mutex.release()
         print('QUALQUER COISA EM CAPS LOCK: !! ' , self.transf)
 
