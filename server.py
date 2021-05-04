@@ -55,9 +55,19 @@ class com_erp:
             '</Current_Stores>').format(stores[0],stores[1],stores[2],stores[3],stores[4],stores[5],stores[6],stores[7],stores[8])
         self.send_msg_udp(msg,addr)
     def send_orders(self,addr):
+
+        for s in lista_ordens_feitas:
+            s.atualizar()
+        for s in lista_ordens_pendentes:
+            s.atualizar()
+        for s in lista_ordens_correntes:
+            s.atualizar()
+
         try:
+
             dic=db.request_orders_db()
             print(dic)
+
         except ValueError:
             print('estourou func')
 
@@ -76,9 +86,10 @@ class ordem:
         self.p=[0,'P1','P2','P3','P4','P5','P6','P7','P8','P9']
 
         self.estado=0
-        self.quantity1=0
-        self.time_inicio=0
-        self.time_fim=0
+        self.quantity1=0   #ja produzidas
+        self.quantity2=0   # em produção
+        self.time_inicio=0 #ST
+        self.time_fim=0    #ET
         self.time_mes=int(time.time())
         for info in mensagem:
             self.number=int(mensagem.attrib["Number"])
@@ -88,10 +99,10 @@ class ordem:
             self.time_erp=int(info.attrib["Time"])
             self.maxdelay=int(info.attrib["MaxDelay"])
             self.penalty=int(info.attrib["Penalty"])
-        self.quantity2=0
-        self.quantity3=self.quantity
+
+        self.quantity3=self.quantity  #por produzir
+
         self.actual_penalty=0
-        self.print_info()
         dic={"nnn":self.number,"from":self.fro,"to":self.to,"quantity":self.quantity,"quantity1":self.quantity1,"quantity2": self.quantity2,\
         "quantity3":self.quantity3,"time":self.time_erp,"time1":self.time_mes,"max_delay":self.maxdelay,\
         "penalty":self.penalty,"start":self.time_inicio,"end":self.time_fim,"penalty_incurred":self.actual_penalty,'estado':self.estado}
@@ -101,6 +112,7 @@ class ordem:
         mutex.release()
         self.calc_penalty()
         self.tempo_atual()
+
     def print_info(self):
         print('---------------------------------')
         print('number= ',self.number)
@@ -110,6 +122,20 @@ class ordem:
         print('maxmelay= ',self.maxdelay)
         print('penalty= ',self.penalty)
         print('---------------------------------')
+    def atualizar(self):
+
+        self.quantity1=sum(np.subtract(self.transf,self.falta_mesmo))
+        self.quantity2=sum(self.falta_mesmo)
+        self.quantity3=sum(self.falta_mesmo)
+        if self.estado != 2:
+            self.calc_penalty()
+        dic={"nnn":self.number,"from":self.fro,"to":self.to,"quantity":self.quantity,"quantity1":self.quantity1,"quantity2": self.quantity2,\
+        "quantity3":self.quantity3,"time":self.time_erp,"time1":self.time_mes,"max_delay":self.maxdelay,\
+        "penalty":self.penalty,"start":self.time_inicio,"end":self.time_fim,"penalty_incurred":self.actual_penalty,'estado':self.estado}
+        mutex.acquire()
+        db.update_order_db('transform', dic)
+        mutex.release()
+
     def tempo_atual(self):
         self.tdecorrer=self.maxdelay-(time.time()-self.time_erp)
         print('falta',self.sec)
@@ -117,6 +143,7 @@ class ordem:
         self.sec=time.time()-self.time_erp
         if self.sec<self.maxdelay:
             self.actual_penalty=0
+        else:
             sec=int((self.sec-self.maxdelay)/50)+1
             self.actual_penalty=sec*self.penalty
         print('---------------------------------')
@@ -144,9 +171,9 @@ class ordem:
             if i<5:
                 self.transf[i]=self.quantity
             else: break
-        self.falta=self.transf.copy() #TESTE FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        self.falta=self.transf.copy()
         self.falta_mesmo=self.transf.copy()
-        #self.falta=self.transf
+
         self.t1=self.transf[1]+self.transf[4]+self.transf[8]
         self.t2=self.transf[2]+self.transf[5]
         self.t3=self.transf[3]+self.transf[6]+self.transf[7]
@@ -387,6 +414,9 @@ class manager:
 
         if (f1>0 or f2>0 or f3>0)and lista_ordens_pendentes!=[]:
             #stock[self.p.index(lista_ordens_pendentes[0].fro)]-=lista_ordens_pendentes[0].quantity
+            lista_ordens_pendentes[0].time_inicio=time.time()
+            lista_ordens_pendentes[0].estado=1
+            lista_ordens_pendentes[0].atualizar()
             lista_ordens_correntes.append(lista_ordens_pendentes.pop(0))
 
 
@@ -395,14 +425,14 @@ class manager:
         self.temp=[0,0,0,0,0,0,0,0,0,0]
         self.temp=self.transf.copy()
         print('self=', self.temp)
-        #self.teste_ler_var(2)
+        self.teste_ler_var(2)
         diference=np.subtract(self.temp,self.transf)
 
-
+        '''
         mutex.acquire()
         self.transf = db.insert_incr(self.inc[1:9])
         mutex.release()
-
+        '''
         print('DIFERENCE->',diference)
         for i in range(1,9):
             stock[self.c[i]]+=diference[i]
@@ -419,6 +449,10 @@ class manager:
             if sum(i.falta_mesmo)==0:
                 print('pop ',i.falta_mesmo)
                 #stock[self.p.index(i.to)]+=i.quantity
+                lista_ordens_correntes[j].time_fim= time.time()
+                lista_ordens_correntes[j].calc_penalty()
+                lista_ordens_correntes[j].estado=2
+                lista_ordens_correntes[j].atualizar()
                 lista_ordens_feitas.append(lista_ordens_correntes.pop(j))
             j=j+1
         print('stock',stock)
