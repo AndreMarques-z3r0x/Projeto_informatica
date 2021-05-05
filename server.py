@@ -574,7 +574,7 @@ lista_descargas_pendentes=[]
 lista_descargas_correntes=[]
 lista_descargas_feitas=[]
 
-stock=[0,40,40,20,20,2,0,0,0,0]
+stock=[0,400,40,20,20,2,2,0,0,0]
 db = DataBase("dbConfig.txt")
 mutex.acquire()
 db.clear_db_tables()
