@@ -41,7 +41,9 @@ class com_erp:
             print("req_order")
             self.send_orders(addr)
     def send_stores(self,addr):
+        mutex.acquire()
         stores=db.request_stores_db()
+        mutex.release()
         msg=('<Current_Stores>\n'
             '<WorkPiece type="P1" quantity="{}"/>\n'
             '<WorkPiece type="P2" quantity="{}"/>\n'
@@ -64,8 +66,9 @@ class com_erp:
             s.atualizar()
 
         try:
-
+            mutex.acquire()
             dic=db.request_orders_db()
+            mutex.release()
             print(dic)
 
         except ValueError:
@@ -230,7 +233,7 @@ class manager:
             i=0
             for desc in lista_descargas_pendentes:
                 if desc.destino =='P1' and self.d1==0:
-                    if desc.quantity<stock[self.p.index(desc.tipo)]:
+                    if desc.quantity<=stock[self.p.index(desc.tipo)]:
                         self.d1=1
                         lista_descargas_correntes.append(desc)
                         self.p1=desc
@@ -240,7 +243,7 @@ class manager:
                         lista_descargas_pendentes.pop(i)
                         print('descargas correntes=',len(lista_descargas_correntes))
                 elif desc.destino =='P2' and self.d2==0:
-                    if desc.quantity<stock[self.p.index(desc.tipo)]:
+                    if desc.quantity<=stock[self.p.index(desc.tipo)]:
                         self.d2=1
                         lista_descargas_correntes.append(desc)
                         self.p2=desc
@@ -250,7 +253,7 @@ class manager:
                         lista_descargas_pendentes.pop(i)
                         print('descargas correntes=',len(lista_descargas_correntes))
                 elif desc.destino =='P3' and self.d3==0:
-                    if desc.quantity<stock[self.p.index(desc.tipo)]:
+                    if desc.quantity<=stock[self.p.index(desc.tipo)]:
                         self.d3=1
                         lista_descargas_correntes.append(desc)
                         self.p3=desc
@@ -418,33 +421,18 @@ class manager:
 
 
         print('inc=', self.inc)
-<<<<<<< HEAD
         self.temp=[0,0,0,0,0,0,0,0,0,0]
         self.temp=self.transf.copy()
         print('self=', self.temp)
         #self.teste_ler_var(2)
-=======
-
-        self.temp=[0,0,0,0,0,0,0,0,0,0]
-        self.temp=self.transf.copy()
-        print('self=', self.temp)
-        self.teste_ler_var(2)
-        diference=np.subtract(self.temp,self.transf)
-
-        '''
->>>>>>> ce7a314f22e608d917e20ad6fc4e81aab71187b4
         mutex.acquire()
         print('self ANTES->.',  self.transf)
         x = db.insert_incr(self.inc[1:9])
         self.transf=x.copy()
         print('self depois->.',  self.transf)
         mutex.release()
-<<<<<<< HEAD
         diference=np.subtract(self.temp,self.transf)
 
-=======
-        '''
->>>>>>> ce7a314f22e608d917e20ad6fc4e81aab71187b4
         print('DIFERENCE->',diference)
         for i in range(1,9):
             stock[self.c[i]]+=diference[i]
@@ -586,9 +574,11 @@ lista_descargas_pendentes=[]
 lista_descargas_correntes=[]
 lista_descargas_feitas=[]
 
-stock=[0,400,40,20,20,20,20,0,0,0]
+stock=[0,40,40,20,20,2,0,0,0,0]
 db = DataBase("dbConfig.txt")
+mutex.acquire()
 db.clear_db_tables()
+mutex.release()
 man=manager()
 
 manager_t = threading.Thread(target=loop_man)

@@ -8,7 +8,7 @@
 #include <mysql.h>
 #include <pthread.h>
 
-#define N_THREADS 100
+#define N_THREADS 10000
 #define PORT 4455
 int server_fd;
 struct sockaddr_in address;
@@ -349,7 +349,7 @@ int create_socket(){
         perror("bind failed");
         exit(EXIT_FAILURE);
     }
-    if (listen(server_fd, 100) < 0)
+    if (listen(server_fd, 100000) < 0)
     {
         perror("listen");
         exit(EXIT_FAILURE);
