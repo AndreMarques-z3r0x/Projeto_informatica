@@ -211,6 +211,14 @@ class descarga:
 
 class manager:
     def __init__(self) :
+        self.tempo_oper=[0,0,0,0,0,0,0,0,0]
+        self.total_tipo=[0,0,0,0,0,0,0,0,0]
+        self.total_peca=0
+        self.total_descarga=0
+        self.total_tipo_descarga=[0,0,0,0,0,0,0,0,0]
+
+
+
         self.transf=[0,0,0,0,0,0,0,0,0]
         self.inc=[0,0,0,0,0,0,0,0,0]
         self.b=[0,1,2,3,4,5,5,6,6]
