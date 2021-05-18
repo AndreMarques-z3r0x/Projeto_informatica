@@ -182,9 +182,7 @@ class ordem:
         self.t3=self.transf[3]+self.transf[6]+self.transf[7]
         print(self.de,self.para)
         print(self.transf)
-        print('t1= ',self.t1)
-        print('t2= ',self.t2)
-        print('t3= ',self.t3)
+
 
 class descarga:
     def __init__(self,mensagem):
@@ -220,12 +218,19 @@ class manager:
         self.t1=0
         self.t2=0
         self.t3=0
-
+        self.tool=[1,2,3,1,1,2,3,3]
         self.d1=0;
         self.d2=0;
         self.d3=0;
 
-        self.buffer=5
+        self.racio1=0.375
+        self.racio2=0.25
+        self.racio3=0.375
+        self.soma_buff=40
+
+        self.buffer1=5
+        self.buffer2=5
+        self.buffer3=5
         self.p=[0,'P1','P2','P3','P4','P5','P6','P7','P8','P9']
     def loop_descaargas(self):
 
@@ -323,52 +328,67 @@ class manager:
                             pedido.falta_mesmo[s]=0
 
 
+    def ver_maquinas(self):
+        b1=0
+        b2=0
+        b3=0
+        print('REEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE')
+        for ord in lista_ordens_correntes:
+            vec==[0,0,0,0,0,0,0,0,0]
+            b1=b1+ ord.falta_mesmo[1]*15+ord.falta_mesmo[4]*15+ord.falta_mesmo[8]*15
+            b2=b2+ ord.falta_mesmo[2]*15+ord.falta_mesmo[5]*30
+            b3=b3+ ord.falta_mesmo[3]*15+ord.falta_mesmo[6]*30+ord.falta_mesmo[7]*30
+            soma=b1+b2+b3
+        k1,k2,k3=0
+        for i in range(0,8):
+            k1=k1+1*(self.tool[i]==1)
+            k2=k1+1*(self.tool[i]==2)
+            k3=k1+1*(self.tool[i]==3)
 
+        self.racio1=k1/8
+        self.buffer1=int(50*self.racio1)
+        self.racio2=k2/8
+        self.buffer2=int(50*self.racio2)
+        self.racio3=k3/8
+        self.buffer3=int(50*self.racio3)
+        print('buffer1={} buffer2={} buffer3={} '.format(self.buffer1,self.buffer2,self.buffer3))
+        #positivo maquinas a mais
+        dif[0]=soma*self.racio1-b1
+        dif[1]=soma*self.racio2-b2
+        dif[2]=soma*self.racio3-b3
+        x=dif.index(max(dif))
+        x1=dif.index(min(dif))
+        if abs(dif[0])>self.soma_buff or abs(dif[1] )>self.soma_buff  or abs(dif[2] )>self.soma_buff :
+             for i in range(3,8):
+                 if self.tool[i]==x+1:
+                     self.tool[i]==x1+1
+                     print(self.tool)
+                     self.atualizar_tool(self.tool)
+                     break
+
+    def atualizar_tool(self,tool):
+        return 1
 
 
     def loop_teste(self):
-
 
         self.inc=[0,0,0,0,0,0,0,0,0]
         self.t1=self.transf[1]+self.transf[4]+self.transf[8]
         self.t2=self.transf[2]+self.transf[5]
         self.t3=self.transf[3]+self.transf[6]+self.transf[7]
 
-        if self.t1!=self.buffer or self.buffer or self.t3!=self.buffer:
-             f1=self.buffer-self.t1
-             f2=self.buffer-self.t2
-             f3=self.buffer-self.t3
+        #if self.t1!=self.buffer1 or self.buffer2 or self.t3!=self.buffer3:
+        f1=self.buffer1-self.t1
+        f2=self.buffer2-self.t2
+        f3=self.buffer3-self.t3
 
-             for pedido in lista_ordens_correntes:
-                if f1>0:
-                    for j in [1,4,8]:
-                        if f1>0:
-                            if pedido.falta[j]>0:
-                                if f1>stock[self.b[j]]: dec=stock[self.b[j]]
-                                else: dec=f1
-
-                                pedido.falta[j]=pedido.falta[j]-dec
-                                self.transf[j]=self.transf[j]+dec
-                                self.inc[j]=self.inc[j]+dec
-                                dec=0
-                                if pedido.falta[j]<0:
-                                    dec=pedido.falta[j]*(-1)
-                                    pedido.falta[j]=0
-                                    self.transf[j]=self.transf[j]-dec
-                                    self.inc[j]=self.inc[j]-dec
-
-                                if f1>stock[self.b[j]]:
-                                    f1=f1-stock[self.b[j]]+dec
-                                    stock[self.b[j]]=stock[self.b[j]] - stock[self.b[j]] + dec
-
-                                else:
-                                    stock[self.b[j]]=stock[self.b[j]]-f1+dec
-                                    f1=dec
-                if f2>0:
-                    for j in [2,5]:
+        for pedido in lista_ordens_correntes:
+            if f1>0 :
+                for j in [1,4,8]:
+                    if f1>0:
                         if pedido.falta[j]>0:
-                            if f2>stock[self.b[j]]: dec=stock[self.b[j]]
-                            else: dec=f2
+                            if f1>stock[self.b[j]]: dec=stock[self.b[j]]
+                            else: dec=f1
 
                             pedido.falta[j]=pedido.falta[j]-dec
                             self.transf[j]=self.transf[j]+dec
@@ -380,36 +400,59 @@ class manager:
                                 self.transf[j]=self.transf[j]-dec
                                 self.inc[j]=self.inc[j]-dec
 
-                            if f2>stock[self.b[j]]:
-                                f2=f2-stock[self.b[j]]+dec
+                            if f1>stock[self.b[j]]:
+                                f1=f1-stock[self.b[j]]+dec
                                 stock[self.b[j]]=stock[self.b[j]] - stock[self.b[j]] + dec
 
                             else:
-                                stock[self.b[j]]=stock[self.b[j]]-f2+dec
-                                f2=dec
-                if f3>0:
-                    for j in [3,6,7] :
+                                stock[self.b[j]]=stock[self.b[j]]-f1+dec
+                                f1=dec
+            if f2>0:
+                for j in [2,5]:
+                    if pedido.falta[j]>0:
+                        if f2>stock[self.b[j]]: dec=stock[self.b[j]]
+                        else: dec=f2
 
-                        if pedido.falta[j]>0 :
-                            if f3>stock[self.b[j]]: dec=stock[self.b[j]]
-                            else: dec=f3
+                        pedido.falta[j]=pedido.falta[j]-dec
+                        self.transf[j]=self.transf[j]+dec
+                        self.inc[j]=self.inc[j]+dec
+                        dec=0
+                        if pedido.falta[j]<0:
+                            dec=pedido.falta[j]*(-1)
+                            pedido.falta[j]=0
+                            self.transf[j]=self.transf[j]-dec
+                            self.inc[j]=self.inc[j]-dec
 
-                            pedido.falta[j]=pedido.falta[j]-dec
-                            self.transf[j]=self.transf[j]+dec
-                            self.inc[j]=self.inc[j]+dec
-                            dec=0
-                            if pedido.falta[j]<0:
-                                dec=pedido.falta[j]*(-1)
-                                pedido.falta[j]=0
-                                self.transf[j]=self.transf[j]-dec
-                                self.inc[j]=self.inc[j]-dec
-                            if f3>stock[self.b[j]]:
-                                f3=f3-stock[self.b[j]]+dec
-                                stock[self.b[j]]=stock[self.b[j]] - stock[self.b[j]] + dec
+                        if f2>stock[self.b[j]]:
+                            f2=f2-stock[self.b[j]]+dec
+                            stock[self.b[j]]=stock[self.b[j]] - stock[self.b[j]] + dec
 
-                            else:
-                                stock[self.b[j]]=stock[self.b[j]]-f3+dec
-                                f3=dec
+                        else:
+                            stock[self.b[j]]=stock[self.b[j]]-f2+dec
+                            f2=dec
+            if f3>0:
+                for j in [3,6,7] :
+
+                    if pedido.falta[j]>0 :
+                        if f3>stock[self.b[j]]: dec=stock[self.b[j]]
+                        else: dec=f3
+
+                        pedido.falta[j]=pedido.falta[j]-dec
+                        self.transf[j]=self.transf[j]+dec
+                        self.inc[j]=self.inc[j]+dec
+                        dec=0
+                        if pedido.falta[j]<0:
+                            dec=pedido.falta[j]*(-1)
+                            pedido.falta[j]=0
+                            self.transf[j]=self.transf[j]-dec
+                            self.inc[j]=self.inc[j]-dec
+                        if f3>stock[self.b[j]]:
+                            f3=f3-stock[self.b[j]]+dec
+                            stock[self.b[j]]=stock[self.b[j]] - stock[self.b[j]] + dec
+
+                        else:
+                            stock[self.b[j]]=stock[self.b[j]]-f3+dec
+                            f3=dec
 
 
         if (f1>0 or f2>0 or f3>0)and lista_ordens_pendentes!=[]:
@@ -423,14 +466,13 @@ class manager:
         print('inc=', self.inc)
         self.temp=[0,0,0,0,0,0,0,0,0,0]
         self.temp=self.transf.copy()
-        print('self=', self.temp)
-        #self.teste_ler_var(2)
+        self.teste_ler_var(2)
+        '''
         mutex.acquire()
-        print('self ANTES->.',  self.transf)
         x = db.insert_incr(self.inc[1:9])
         self.transf=x.copy()
-        print('self depois->.',  self.transf)
         mutex.release()
+        '''
         diference=np.subtract(self.temp,self.transf)
 
         print('DIFERENCE->',diference)
@@ -438,9 +480,6 @@ class manager:
             stock[self.c[i]]+=diference[i]
 
         self.check_order_finish(diference)
-
-
-
 
         j=0
         for i in lista_ordens_correntes:
@@ -549,6 +588,7 @@ def loop_man():
     while 1:
         if lista_ordens_pendentes!=[] or lista_ordens_correntes!=[] or sum(man.transf)!=0:
             man.sort_order(lista_ordens_pendentes)
+            man.ver_maquinas()
             man.loop_teste()
 
         if lista_descargas_pendentes!=[] or lista_descargas_correntes!=[]:
