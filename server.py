@@ -140,10 +140,10 @@ class ordem:
         mutex.release()
 
     def tempo_atual(self):
-        self.tdecorrer=self.maxdelay-(time.time()-self.time_erp)
+        self.tdecorrer=self.maxdelay-(time.time()-self.time_mes)
         print('falta',self.sec)
     def calc_penalty(self):
-        self.sec=time.time()-self.time_erp
+        self.sec=time.time()-self.time_mes
         if self.sec<self.maxdelay:
             self.actual_penalty=0
         else:
@@ -574,7 +574,7 @@ lista_descargas_pendentes=[]
 lista_descargas_correntes=[]
 lista_descargas_feitas=[]
 
-stock=[0,400,40,20,20,2,2,0,0,0]
+stock=[0,400,40,20,20,20,20,0,0,0]
 db = DataBase("dbConfig.txt")
 mutex.acquire()
 db.clear_db_tables()

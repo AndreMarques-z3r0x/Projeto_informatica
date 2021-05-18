@@ -43,6 +43,7 @@ class DataBase:
         for(Piece, quantity) in cursor:
             __quantity_pieces.append(quantity)
         cursor.close()
+        print("Stores --> ", __quantity_pieces)
         return __quantity_pieces
 
     def request_orders_db(self):
@@ -214,6 +215,12 @@ class DataBase:
             self.mysqldb.commit()
             __cursor.close()
         return [0]+__teste[:-1]
+    
+    def tools_change(data):
+        __msg = "toll"
+        for x in data:
+            __msg += "," + x
+        print(__msg) 
 
 
 def socket_send_message(message):
