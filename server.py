@@ -211,12 +211,16 @@ class descarga:
 
 class manager:
     def __init__(self) :
-        self.tempo_oper=[0,0,0,0,0,0,0,0,0]
+        self.tempo_oper=[0,0,0,0,0,0,0]
         self.total_tipo=[0,0,0,0,0,0,0,0,0]
         self.total_peca=0
-        self.total_descarga=0
-        self.total_tipo_descarga=[0,0,0,0,0,0,0,0,0]
 
+        self.total_descarga1=0
+        self.total_descarga2=0
+        self.total_descarga3=0
+        self.total_tipo_descarga1=[0,0,0,0,0,0,0,0,0,0]
+        self.total_tipo_descarga2=[0,0,0,0,0,0,0,0,0,0]
+        self.total_tipo_descarga3=[0,0,0,0,0,0,0,0,0,0]
 
 
         self.transf=[0,0,0,0,0,0,0,0,0]
@@ -276,7 +280,6 @@ class manager:
                         lista_descargas_pendentes.pop(i)
                         print('descargas correntes=',len(lista_descargas_correntes))
                 i=i+1
-
         if self.d1==1:
             mutex.acquire()
             dic=db.read_unload_plc_state()
@@ -284,7 +287,10 @@ class manager:
             if dic[0]==0:
                 self.p1.estado=1
                 self.p1.atualizar_descarga_db()
+                self.total_descarga+=self.p1.quantity
+                self.total_tipo_descarga1[int(self.p1.tipo[1:])]+=self.p1.quantity
                 lista_descargas_feitas.append(self.p1)
+
                 print('descargas feitas=',len(lista_descargas_feitas))
                 self.d1=0
         if self.d2==1:
@@ -294,6 +300,8 @@ class manager:
             if dic[1]==0:
                 self.p2.estado=1
                 self.p2.atualizar_descarga_db()
+                self.total_descarga2+=self.p2.quantity
+                self.total_tipo_descarga2[int(self.p2.tipo[1:])]+=self.p2.quantity
                 lista_descargas_feitas.append(self.p2)
                 print('descargas feitas=',len(lista_descargas_feitas))
                 self.d2=0
@@ -304,9 +312,12 @@ class manager:
             if dic[2]==0:
                 self.p3.estado=1
                 self.p3.atualizar_descarga_db()
+                self.total_descarga3+=self.p2.quantity3
+                self.total_tipo_descarga3[int(self.p3.tipo[1:])]+=self.p3.quantity
                 lista_descargas_feitas.append(self.p3)
                 print('descargas feitas=',len(lista_descargas_feitas))
                 self.d3=0
+
     def teste_ler_descargas(self):
         return [0,0,0]
     def teste_ler_var(self,valor):
@@ -322,8 +333,6 @@ class manager:
         for l in lista:
             print('sort- ',l.number)
         return lista
-
-
     def check_order_finish(self,dif):
         for pedido in lista_ordens_correntes:
             for s in range(1,9):
@@ -334,8 +343,6 @@ class manager:
                         if pedido.falta_mesmo[s]<0:
                             dif[s]=pedido.falta_mesmo[s]*(-1)
                             pedido.falta_mesmo[s]=0
-
-
     def ver_maquinas(self):
         b1=0
         b2=0
@@ -384,11 +391,8 @@ class manager:
                      db.tools_change(self.tool)
                      #self.atualizar_tool(self.tool)
                      break
-
     def atualizar_tool(self,tool):
         return 1
-
-
     def loop_teste(self):
 
         self.inc=[0,0,0,0,0,0,0,0,0]
@@ -486,17 +490,38 @@ class manager:
         self.temp=[0,0,0,0,0,0,0,0,0,0]
         self.temp=self.transf.copy()
         #self.teste_ler_var(2)
-        
+
         mutex.acquire()
         x = db.insert_incr(self.inc[1:9])
         self.transf=x.copy()
         mutex.release()
-    
+
         diference=np.subtract(self.temp,self.transf)
 
         print('DIFERENCE->',diference)
         for i in range(1,9):
             stock[self.c[i]]+=diference[i]
+
+
+        self.tempo_oper[1]+=diference[1]*15
+        self.tempo_oper[2]+=diference[2]*15
+        self.tempo_oper[3]+=odiference[3]*15
+        self.tempo_oper[4]+=diference[4]*15
+        self.tempo_oper[5]+=diference[5]*30+ diference[6]*30
+        self.tempo_oper[6]+=diference[7]*30+ diference[8]*15
+
+        self.total_tipo[1]+=diference[1]
+        self.total_tipo[2]+=diference[2]
+        self.total_tipo[3]+=diference[3]
+        self.total_tipo[4]+=diference[4]
+        self.total_tipo[5]+=diference[5]
+        self.total_tipo[6]+=diference[6]
+        self.total_tipo[7]+=diference[7]
+        self.total_tipo[8]+=diference[8]
+
+        self.total_peca=sum(total_tipo)
+
+
 
         self.check_order_finish(diference)
 
@@ -515,8 +540,6 @@ class manager:
             j=j+1
         print('stock',stock)
         print('----------')
-
-
     def loop(self):
 
         self.inc=[0,0,0,0,0,0,0,0,0]
