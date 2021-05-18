@@ -370,6 +370,25 @@ void* stocks_thread(){
     start_stocks_thread();
 }
 
+int change_tools(char *value_str){
+    //printf("\nvalue_str --> %s\n", value_str);
+    int arr[8];
+    int i=0;
+    char *s_val = strtok(value_str,",");
+    while (s_val!=NULL)
+    {
+        arr[i]=atoi(s_val);
+        i++;
+        printf( " \n%s  --> int:=%d", s_val,arr[i-1]);
+        s_val = strtok(NULL,",");
+    }
+    // printf("\narr:=  ");
+    // for (int k=0;k<8;i++)
+    //     printf(" %d ",arr[k]);
+    // printf("\n");
+    return 0;
+}
+
 int main(int argc, char const *argv[])
 {   
     opcua_connect_to_server();
@@ -418,6 +437,12 @@ int main(int argc, char const *argv[])
 
         }else if(strcmp(command,"NewOrder") ==0 && zone==1){
             start_orders();
+        }else{
+            char * token =strtok(command," ");            
+            if (strcmp(token,"tool ")){
+                token = strtok(NULL, " ");
+                change_tools(token);
+            }
         }
         memset(buffer, 0, sizeof buffer);
     

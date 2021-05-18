@@ -216,11 +216,15 @@ class DataBase:
             __cursor.close()
         return [0]+__teste[:-1]
     
-    def tools_change(data):
-        __msg = "toll"
-        for x in data:
-            __msg += "," + x
-        print(__msg) 
+    def tools_change(self, data):
+        __msg = "tool "
+        for i in range (data.__len__()):
+            if i == data.__len__()-1:
+                __msg += str(data[i])
+            else:
+                __msg += str(data[i]) + ","
+        print(__msg)
+        socket_send_message(__msg)
 
 
 def socket_send_message(message):
@@ -283,8 +287,10 @@ def main():
     """
     #db.insert_order_db('unload', info2)
     #orders = db.request_orders_db('transform')
-    db.update_order_db("unload_plc", info2)
+    #db.update_order_db("unload_plc", info2)
     #db.clear_db_tables()
+    tools_pret=[1,1,2,3,1,2,3,1]
+    db.tools_change(tools_pret)
     return 0
 
 if __name__ == '__main__':
