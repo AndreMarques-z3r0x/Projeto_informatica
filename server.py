@@ -505,7 +505,7 @@ class manager:
 
         self.tempo_oper[1]+=diference[1]*15
         self.tempo_oper[2]+=diference[2]*15
-        self.tempo_oper[3]+=odiference[3]*15
+        self.tempo_oper[3]+=diference[3]*15
         self.tempo_oper[4]+=diference[4]*15
         self.tempo_oper[5]+=diference[5]*30+ diference[6]*30
         self.tempo_oper[6]+=diference[7]*30+ diference[8]*15
@@ -519,7 +519,7 @@ class manager:
         self.total_tipo[7]+=diference[7]
         self.total_tipo[8]+=diference[8]
 
-        self.total_peca=sum(total_tipo)
+        self.total_peca=sum(self.total_tipo)
 
 
 

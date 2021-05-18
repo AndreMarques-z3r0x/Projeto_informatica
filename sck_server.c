@@ -379,13 +379,9 @@ int change_tools(char *value_str){
     {
         arr[i]=atoi(s_val);
         i++;
-        printf( " \n%s  --> int:=%d", s_val,arr[i-1]);
         s_val = strtok(NULL,",");
     }
-    // printf("\narr:=  ");
-    // for (int k=0;k<8;i++)
-    //     printf(" %d ",arr[k]);
-    // printf("\n");
+    plc_write_values("tool_pret",1,8,arr);
     return 0;
 }
 

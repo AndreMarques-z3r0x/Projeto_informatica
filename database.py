@@ -289,7 +289,7 @@ def main():
     #orders = db.request_orders_db('transform')
     #db.update_order_db("unload_plc", info2)
     #db.clear_db_tables()
-    tools_pret=[1,1,2,3,1,2,3,1]
+    tools_pret=[4,5,2,3,1,2,3,7]
     db.tools_change(tools_pret)
     return 0
 

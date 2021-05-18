@@ -24,6 +24,7 @@
         <Node name="receive" type="T_ARRAY__1__9__OF_INT" access="ReadWrite" />
         <Node name="stock" type="T_ARRAY__1__9__OF_INT" access="ReadWrite" />
         <Node name="tempo_total_op_maq" type="T_ARRAY__1__8__OF_INT" access="ReadWrite" />
+        <Node name="tool_pret" type="T_ARRAY__1__8__OF_INT" access="ReadWrite" />
         <Node name="transf" type="T_ARRAY__1__9__OF_INT" access="ReadWrite" />
         <Node name="unload_zone_1" type="T_ARRAY__1__10__OF_INT" access="ReadWrite" />
         <Node name="unload_zone_2" type="T_ARRAY__1__10__OF_INT" access="ReadWrite" />
