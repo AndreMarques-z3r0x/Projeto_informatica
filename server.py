@@ -227,7 +227,7 @@ class manager:
         self.racio2=0.25
         self.racio3=0.375
         self.soma_buff=40
-
+        self.buffer=20
         self.buffer1=5
         self.buffer2=5
         self.buffer3=5
@@ -332,37 +332,47 @@ class manager:
         b1=0
         b2=0
         b3=0
+        soma=0
         print('REEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE')
         for ord in lista_ordens_correntes:
-            vec==[0,0,0,0,0,0,0,0,0]
+
             b1=b1+ ord.falta_mesmo[1]*15+ord.falta_mesmo[4]*15+ord.falta_mesmo[8]*15
             b2=b2+ ord.falta_mesmo[2]*15+ord.falta_mesmo[5]*30
             b3=b3+ ord.falta_mesmo[3]*15+ord.falta_mesmo[6]*30+ord.falta_mesmo[7]*30
-            soma=b1+b2+b3
-        k1,k2,k3=0
+        soma=b1+b2+b3
+        k1=0
+        k2=0
+        k3=0
         for i in range(0,8):
             k1=k1+1*(self.tool[i]==1)
-            k2=k1+1*(self.tool[i]==2)
-            k3=k1+1*(self.tool[i]==3)
+            k2=k2+1*(self.tool[i]==2)
+            k3=k3+1*(self.tool[i]==3)
 
         self.racio1=k1/8
-        self.buffer1=int(50*self.racio1)
+        self.buffer1=int(self.buffer*self.racio1)
         self.racio2=k2/8
-        self.buffer2=int(50*self.racio2)
+        self.buffer2=int(self.buffer*self.racio2)
         self.racio3=k3/8
-        self.buffer3=int(50*self.racio3)
+        self.buffer3=int(self.buffer*self.racio3)
         print('buffer1={} buffer2={} buffer3={} '.format(self.buffer1,self.buffer2,self.buffer3))
+        print('racio1={} racio2={} racio3={} '.format(self.racio1,self.racio2,self.racio3))
+        print('k1={} k2={} k3={} '.format(k1,k2,k3))
         #positivo maquinas a mais
+        dif=[0,0,0]
         dif[0]=soma*self.racio1-b1
         dif[1]=soma*self.racio2-b2
         dif[2]=soma*self.racio3-b3
         x=dif.index(max(dif))
         x1=dif.index(min(dif))
+        print('MAX=' ,x)
+        print('MIN=' ,x1)
         if abs(dif[0])>self.soma_buff or abs(dif[1] )>self.soma_buff  or abs(dif[2] )>self.soma_buff :
              for i in range(3,8):
+
                  if self.tool[i]==x+1:
-                     self.tool[i]==x1+1
-                     print(self.tool)
+                     print('IIIIIIIII=',i)
+                     self.tool[i]=x1+1
+                     print('tooooooooooool=' ,self.tool)
                      self.atualizar_tool(self.tool)
                      break
 
