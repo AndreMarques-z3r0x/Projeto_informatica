@@ -227,9 +227,9 @@ class manager:
         self.t2=0
         self.t3=0
         self.tool=[1,2,3,1,1,2,3,3]
-        self.d1=0;
-        self.d2=0;
-        self.d3=0;
+        self.d1=0
+        self.d2=0
+        self.d3=0
 
         self.racio1=0.375
         self.racio2=0.25
@@ -381,7 +381,8 @@ class manager:
                      print('IIIIIIIII=',i)
                      self.tool[i]=x1+1
                      print('tooooooooooool=' ,self.tool)
-                     self.atualizar_tool(self.tool)
+                     db.tools_change(self.tool)
+                     #self.atualizar_tool(self.tool)
                      break
 
     def atualizar_tool(self,tool):
@@ -484,13 +485,13 @@ class manager:
         print('inc=', self.inc)
         self.temp=[0,0,0,0,0,0,0,0,0,0]
         self.temp=self.transf.copy()
-        self.teste_ler_var(2)
-        '''
+        #self.teste_ler_var(2)
+        
         mutex.acquire()
         x = db.insert_incr(self.inc[1:9])
         self.transf=x.copy()
         mutex.release()
-        '''
+    
         diference=np.subtract(self.temp,self.transf)
 
         print('DIFERENCE->',diference)
