@@ -5,7 +5,11 @@ from database import DataBase
 import random
 import threading
 import subprocess
+import sys
 
+from old_ui import Ui_ERP
+from ui import Ui_MainWindow
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 class com_erp:
     def __init__(self,host,port):
@@ -287,7 +291,7 @@ class manager:
             if dic[0]==0:
                 self.p1.estado=1
                 self.p1.atualizar_descarga_db()
-                self.total_descarga+=self.p1.quantity
+                self.total_descarga1+=self.p1.quantity
                 self.total_tipo_descarga1[int(self.p1.tipo[1:])]+=self.p1.quantity
                 lista_descargas_feitas.append(self.p1)
 
@@ -644,6 +648,24 @@ def loop_man():
         except:
             print('reeeeeeer')
             pass
+
+
+def ui_estat():
+    ap = QtWidgets.QApplication(sys.argv)
+    MainWindo = QtWidgets.QMainWindow()
+    ui_estat = Ui_MainWindow()
+    ui_estat.setupUi(MainWindo)
+    MainWindo.show()
+    sys.exit(ap.exec_())
+
+
+
+
+try:
+    ui_estat_t = threading.Thread(target=ui_estat)
+    ui_estat_t.start()
+except:
+    print('rip')
 
 import keyboard
 import numpy as np
