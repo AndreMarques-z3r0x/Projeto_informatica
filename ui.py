@@ -170,11 +170,19 @@ class Ui_MainWindow(object):
         item.setText(_translate("MainWindow", "D2"))
         item = self.table_descargas.horizontalHeaderItem(2)
         item.setText(_translate("MainWindow", "D3"))
-        __sortingEnabled = self.table_descargas.isSortingEnabled()
-        self.table_descargas.setSortingEnabled(False)
-        item = self.table_descargas.item(3, 0)
-        item.setText(_translate("MainWindow", "wwwwwwwww"))
-        self.table_descargas.setSortingEnabled(__sortingEnabled)
+
+        for i in range(0,3):
+            for j in range(0,9):
+                __sortingEnabled = self.table_descargas.isSortingEnabled()
+                self.table_descargas.setSortingEnabled(False)
+                item = self.table_descargas.item(i, j)
+                if j==0:
+                    item.setText(_translate("MainWindow", manager.total_tipo_descarga1[i+1]))
+                elif j==1:
+                    item.setText(_translate("MainWindow", manager.total_tipo_descarga2[i+1]))
+                else:
+                    item.setText(_translate("MainWindow", manager.total_tipo_descarga3[i+1]))
+                self.table_descargas.setSortingEnabled(__sortingEnabled)
 
 
 if __name__ == "__main__":
