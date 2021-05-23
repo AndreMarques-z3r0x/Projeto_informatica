@@ -13,7 +13,7 @@ class com_erp:
         self.PORT=port
         self.server = socket(AF_INET, SOCK_DGRAM)
         print("inicio server")
-        self.server.bind((self.HOST,self.PORT))
+        self.server.bind(("0.0.0.0",self.PORT))
 
     def read_msg_udp(self):
             msg,addr=self.server.recvfrom(1025)
