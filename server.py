@@ -196,7 +196,8 @@ class Ui_MainWindow(object):
                         self.table_descargas.setItem(j,i,QtWidgets.QTableWidgetItem(str( man.total_tipo_descarga3[j])))
                     except:
                         print('f')
-
+        print("[+] man Total str mae do lucas --> ",str(man.total_tipo_descarga1))
+        print("[+] man Total --> ", man.total_tipo_descarga1)
         self.table_descargas.setItem(10,0,QtWidgets.QTableWidgetItem(str( sum(man.total_tipo_descarga1))))
         self.table_descargas.setItem(10,1,QtWidgets.QTableWidgetItem(str( sum(man.total_tipo_descarga2))))
         self.table_descargas.setItem(10,2,QtWidgets.QTableWidgetItem(str( sum(man.total_tipo_descarga3))))
@@ -484,6 +485,8 @@ class manager:
                 self.p1.atualizar_descarga_db()
                 self.total_descarga1+=self.p1.quantity
                 self.total_tipo_descarga1[int(self.p1.tipo[1:])]+=self.p1.quantity
+                print("[+] Total Tipo -->",self.total_tipo_descarga1)
+                print("[+] P1 --> ", int(self.p1.tipo[1:]))
                 lista_descargas_feitas.append(self.p1)
 
                 print('descargas feitas=',len(lista_descargas_feitas))
@@ -507,7 +510,7 @@ class manager:
             if dic[2]==0:
                 self.p3.estado=1
                 self.p3.atualizar_descarga_db()
-                self.total_descarga3+=self.p2.quantity3
+                self.total_descarga3+=self.p3.quantity
                 self.total_tipo_descarga3[int(self.p3.tipo[1:])]+=self.p3.quantity
                 lista_descargas_feitas.append(self.p3)
                 print('descargas feitas=',len(lista_descargas_feitas))
@@ -759,12 +762,19 @@ def loop_man():
 
 
 def ui_estat():
-    ap = QtWidgets.QApplication(sys.argv)
-    MainWindo = QtWidgets.QMainWindow()
-    ui_estat = Ui_MainWindow()
-    ui_estat.setupUi(MainWindo)
-    MainWindo.show()
-    sys.exit(ap.exec_())
+    while True:
+        ap = QtWidgets.QApplication(sys.argv)
+        print("11111111111111111111111111111111")
+        MainWindo = QtWidgets.QMainWindow()
+        print("222222222222222222222222222222222")
+        ui_estat = Ui_MainWindow()
+        print("333333333333333333333333333333333")
+        ui_estat.setupUi(MainWindo)
+        print("44444444444444444444444444444444")
+        MainWindo.show()
+        print("555555555555555555555555555555555")
+        #sys.exit(ap.exec_())
+        print("69696969696969696969696969696969")
 
 
 
