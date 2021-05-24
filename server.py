@@ -176,10 +176,6 @@ class Ui_MainWindow(object):
         item = self.table_descargas.item(1, 1)
         item.setItem(_translate("MainWindow","1"))
         '''
-        print('cona')
-
-
-
 
         self.table_descargas.setSortingEnabled(__sortingEnabled)
 
@@ -208,7 +204,11 @@ class Ui_MainWindow(object):
         self.table_descargas.setItem(10,0,QtWidgets.QTableWidgetItem(str( sum(man.total_tipo_descarga1))))
         self.table_descargas.setItem(10,1,QtWidgets.QTableWidgetItem(str( sum(man.total_tipo_descarga2))))
         self.table_descargas.setItem(10,2,QtWidgets.QTableWidgetItem(str( sum(man.total_tipo_descarga3))))
-        maq=[[0,0,0,0,0,0],[1,1,1,1,1,1],[2,2,2,2,0,0],[3,0,0,0,0,0],[0,4,0,0,0,0],[0,5,0,0,0,0,],[0,6,0,0,0,0],[7,0,0,0,0,0],[0,0,0,0,0,0,1,2]]
+        #maq=[[0,0,0,0,0,0],[1,1,1,1,1,1],[2,2,2,2,0,0],[3,0,0,0,0,0],[0,4,0,0,0,0],[0,5,0,0,0,0,],[0,6,0,0,0,0],[7,0,0,0,0,0],[0,0,0,0,0,0,1,2]]
+        mutex.acquire()
+        maq=db.read_maq_stat()
+        mutex.release()
+        maq.append([0,0,0,0,0,0,1,2])
         for i in range(0,8):
             for j in range(1,7):
                 self.table_ordens.setItem(j,i,QtWidgets.QTableWidgetItem(str( maq[i][j-1])))
@@ -836,7 +836,7 @@ def ui_estat():
 import keyboard
 import numpy as np
 mutex = threading.Lock()
-erp=com_erp("127.0.0.1",54321)
+erp=com_erp("127.0.0.1",55321)
 lista_ordens_pendentes=[]
 lista_ordens_correntes=[]
 lista_ordens_feitas=[]

@@ -44,6 +44,7 @@ class DataBase:
             __quantity_pieces.append(quantity)
         cursor.close()
         print("Stores --> ", __quantity_pieces)
+        self.mysqldb.commit()
         return __quantity_pieces
 
     def request_orders_db(self):
@@ -236,7 +237,7 @@ class DataBase:
                 maquinas.append(x)
                 print(x)
             print(maquinas)
-        return 0        
+        return maquinas      
 
 def socket_send_message(message):
         host = socket.gethostname()  
