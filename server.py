@@ -766,19 +766,19 @@ def loop_man():
 
 
 def ui_estat():
-    while True:
-        ap = QtWidgets.QApplication(sys.argv)
-        print("11111111111111111111111111111111")
-        MainWindo = QtWidgets.QMainWindow()
-        print("222222222222222222222222222222222")
-        ui_estat = Ui_MainWindow()
-        print("333333333333333333333333333333333")
-        ui_estat.setupUi(MainWindo)
-        print("44444444444444444444444444444444")
-        MainWindo.show()
-        print("555555555555555555555555555555555")
-        #sys.exit(ap.exec_())
-        print("69696969696969696969696969696969")
+
+    ap = QtWidgets.QApplication(sys.argv)
+    print("11111111111111111111111111111111")
+    MainWindo = QtWidgets.QMainWindow()
+    print("222222222222222222222222222222222")
+    ui_estat = Ui_MainWindow()
+    print("333333333333333333333333333333333")
+    ui_estat.setupUi(MainWindo)
+    print("44444444444444444444444444444444")
+    MainWindo.show()
+    print("555555555555555555555555555555555")
+    sys.exit(ap.exec_())
+    print("69696969696969696969696969696969")
 
 
 
@@ -805,11 +805,10 @@ man=manager()
 manager_t = threading.Thread(target=loop_man)
 manager_t.start()
 #subprocess.run(["bash", "insert.sh"])
-try:
-    ui_estat_t = threading.Thread(target=ui_estat)
-    ui_estat_t.start()
-except:
-    print('rip')
+
+ui_estat_t = threading.Thread(target=ui_estat)
+ui_estat_t.start()
+
 
 if __name__ == '__main__':
     while 1:
