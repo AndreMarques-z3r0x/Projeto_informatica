@@ -226,6 +226,17 @@ class DataBase:
         print(__msg)
         socket_send_message(__msg)
 
+    def read_maq_stat(self):
+        with open("maq_data.data") as file_in:
+            lines=[]
+            maquinas=[]
+            for line in file_in:
+                lines.append(line)
+                x = [int(n) for n in line.split(",")]
+                maquinas.append(x)
+                print(x)
+            print(maquinas)
+        return 0        
 
 def socket_send_message(message):
         host = socket.gethostname()  
@@ -289,8 +300,13 @@ def main():
     #orders = db.request_orders_db('transform')
     #db.update_order_db("unload_plc", info2)
     #db.clear_db_tables()
-    tools_pret=[4,5,2,3,1,2,3,7]
-    db.tools_change(tools_pret)
+    # tools_pret=[4,5,2,3,1,2,3,7]
+    # db.tools_change(tools_pret)
+    # flag=1
+    # if (flag):
+    #     socket_send_message("6MaqSt")
+    #     flag=0
+    db.read_maq_stat()
     return 0
 
 if __name__ == '__main__':

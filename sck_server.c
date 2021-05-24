@@ -362,6 +362,8 @@ int start_stocks_thread()
                 pthread_mutex_unlock(&mtx_mysql);
             }
         }
+
+    start_estatistica();
     sleep(1);
     }
 }
@@ -383,6 +385,22 @@ int change_tools(char *value_str){
     }
     plc_write_values("tool_pret",1,8,arr);
     return 0;
+}
+
+int start_estatistica(){
+    char var_name[150];
+    int arr[6];
+    char maq_dados[6][50];
+    int total_size=0;
+    for(int i = 0; i<6;i++){
+        sprintf(var_name,"Maq%d",i+1); 
+        int* r_values = plc_read_values(var_name,1,6,arr);
+        sprintf(maq_dados[i], "%d,%d,%d,%d,%d,%d",r_values[0],r_values[1],r_values[2],r_values[3],r_values[4],r_values[5]);
+    }
+    FILE *f = fopen("maq_data.data","wb");
+    fprintf(f,"%s\n%s\n%s\n%s\n%s\n%s\n",maq_dados[0],maq_dados[1],maq_dados[2],maq_dados[3],maq_dados[4],maq_dados[5]);
+    fclose(f);
+    printf("[+] Updated file exchange data!");
 }
 
 int main(int argc, char const *argv[])

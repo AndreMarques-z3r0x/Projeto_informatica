@@ -179,7 +179,7 @@ class Ui_MainWindow(object):
         '''
 
         self.table_descargas.setSortingEnabled(__sortingEnabled)
-        QtCore.QTimer.singleShot(10000, self.rel)
+        QtCore.QTimer.singleShot(1000, self.rel)
         self.table_descargas.setSortingEnabled(__sortingEnabled)
     def rel(self):
         for i in range(0,3):
@@ -787,7 +787,7 @@ def ui_estat():
 import keyboard
 import numpy as np
 mutex = threading.Lock()
-erp=com_erp("127.0.0.1",54321)
+erp=com_erp("127.0.0.1",55321)
 lista_ordens_pendentes=[]
 lista_ordens_correntes=[]
 lista_ordens_feitas=[]
