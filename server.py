@@ -10,6 +10,7 @@ import sys
 from old_ui import Ui_ERP
 #from ui import Ui_MainWindow
 from PyQt5 import QtCore, QtGui, QtWidgets
+i=0
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -177,16 +178,34 @@ class Ui_MainWindow(object):
 
 
         '''
+        print('cona')
+
+
+
 
         self.table_descargas.setSortingEnabled(__sortingEnabled)
-        QtCore.QTimer.singleShot(10000, self.rel)
-        self.table_descargas.setSortingEnabled(__sortingEnabled)
+
+        self.checkThreadTimer = QtCore.QTimer()
+        self.checkThreadTimer.setInterval(1000) #.5 seconds
+        self.checkThreadTimer.timeout.connect(self.rel)
+        self.checkThreadTimer.start(1000)
+        '''
+        self.at = QtWidgets.QPushButton(self.centralwidget)
+        self.at.setGeometry(QtCore.QRect(20+500, 280, 161, 51))
+        self.at.setObjectName("ATUALIZAR")
+
+        self.at.setText(_translate("MainWindow", "at"))
+        self.at.clicked.connect(lambda: self.rel())
+        '''
+
     def rel(self):
+        print('cona')
         for i in range(0,3):
             for j in range(1,10):
                 if i==0:
 
                         self.table_descargas.setItem(j,i,QtWidgets.QTableWidgetItem( str(man.total_tipo_descarga1[j])))
+
 
                 elif i==1:
 
