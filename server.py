@@ -188,7 +188,7 @@ class Ui_MainWindow(object):
         self.checkThreadTimer = QtCore.QTimer()
         self.checkThreadTimer.setInterval(1000) #.5 seconds
         self.checkThreadTimer.timeout.connect(self.rel)
-        self.checkThreadTimer.start(1000)
+        self.checkThreadTimer.start(5000)
         '''
         self.at = QtWidgets.QPushButton(self.centralwidget)
         self.at.setGeometry(QtCore.QRect(20+500, 280, 161, 51))
@@ -199,29 +199,27 @@ class Ui_MainWindow(object):
         '''
 
     def rel(self):
-        print('cona')
+
         for i in range(0,3):
             for j in range(1,10):
                 if i==0:
-
                         self.table_descargas.setItem(j,i,QtWidgets.QTableWidgetItem( str(man.total_tipo_descarga1[j])))
-
-
                 elif i==1:
-
                         self.table_descargas.setItem(j,i,QtWidgets.QTableWidgetItem( str(man.total_tipo_descarga2[j])))
-
                 else:
-                    try:
                         self.table_descargas.setItem(j,i,QtWidgets.QTableWidgetItem(str( man.total_tipo_descarga3[j])))
-                    except:
-                        print('f')
-        print("[+] man Total str mae do lucas --> ",str(man.total_tipo_descarga1))
-        print("[+] man Total --> ", man.total_tipo_descarga1)
         self.table_descargas.setItem(10,0,QtWidgets.QTableWidgetItem(str( sum(man.total_tipo_descarga1))))
         self.table_descargas.setItem(10,1,QtWidgets.QTableWidgetItem(str( sum(man.total_tipo_descarga2))))
         self.table_descargas.setItem(10,2,QtWidgets.QTableWidgetItem(str( sum(man.total_tipo_descarga3))))
+        maq=[[0,0,0,0,0,0],[1,1,1,1,1,1],[2,2,2,2,0,0],[3,0,0,0,0,0],[0,4,0,0,0,0],[0,5,0,0,0,0,],[0,6,0,0,0,0],[7,0,0,0,0,0],[0,0,0,0,0,0,1,2]]
+        for i in range(0,8):
+            for j in range(1,7):
+                self.table_ordens.setItem(j,i,QtWidgets.QTableWidgetItem(str( maq[i][j-1])))
+        for i in range(0,8):
+            self.table_ordens.setItem(7,i,QtWidgets.QTableWidgetItem(str( sum(maq[i]))))
 
+        for i in range(0,8):
+            self.table_ordens.setItem(8,i,QtWidgets.QTableWidgetItem(str(maq[8][i] )))
 
 class com_erp:
     def __init__(self,host,port):
@@ -247,7 +245,7 @@ class com_erp:
 
         if mensagem.tag=='Order':
             if mensagem.findall('Transform')!=[]:
-                lista_ordens_pendentes.append(ordem(mensagem))
+                lista_ordens_pendentes.append(ordem(mensagem,1))
             if mensagem.findall('Unload')!=[]:
                 lista_descargas_pendentes.append(descarga(mensagem))
         if mensagem.tag=='Request_Stores':
@@ -301,37 +299,73 @@ class com_erp:
         self.send_msg_udp(msg,addr)
 
 class ordem:
-    def __init__(self,mensagem):
+    def __init__(self,mensagem,flag):
         self.p=[0,'P1','P2','P3','P4','P5','P6','P7','P8','P9']
+        if flag==1:
+            self.estado=0
+            self.quantity1=0   #ja produzidas
+            self.quantity2=0   # em produção
+            self.time_inicio=0 #ST
+            self.time_fim=0    #ET
+            self.time_mes=int(time.time())
+            for info in mensagem:
+                self.number=int(mensagem.attrib["Number"])
+                self.fro=info.attrib["From"]
+                self.to=info.attrib["To"]
+                self.quantity=int(info.attrib["Quantity"])
+                self.time_erp=int(info.attrib["Time"])
+                self.maxdelay=int(info.attrib["MaxDelay"])
+                self.penalty=int(info.attrib["Penalty"])
 
-        self.estado=0
-        self.quantity1=0   #ja produzidas
-        self.quantity2=0   # em produção
-        self.time_inicio=0 #ST
-        self.time_fim=0    #ET
-        self.time_mes=int(time.time())
-        for info in mensagem:
-            self.number=int(mensagem.attrib["Number"])
-            self.fro=info.attrib["From"]
-            self.to=info.attrib["To"]
-            self.quantity=int(info.attrib["Quantity"])
-            self.time_erp=int(info.attrib["Time"])
-            self.maxdelay=int(info.attrib["MaxDelay"])
-            self.penalty=int(info.attrib["Penalty"])
+            self.quantity3=self.quantity  #por produzir
 
-        self.quantity3=self.quantity  #por produzir
+            self.actual_penalty=0
+            dic={"nnn":self.number,"from":self.fro,"to":self.to,"quantity":self.quantity,"quantity1":self.quantity1,"quantity2": self.quantity2,\
+            "quantity3":self.quantity3,"time":self.time_erp,"time1":self.time_mes,"max_delay":self.maxdelay,\
+            "penalty":self.penalty,"start":self.time_inicio,"end":self.time_fim,"penalty_incurred":self.actual_penalty,'estado':self.estado}
 
-        self.actual_penalty=0
-        dic={"nnn":self.number,"from":self.fro,"to":self.to,"quantity":self.quantity,"quantity1":self.quantity1,"quantity2": self.quantity2,\
-        "quantity3":self.quantity3,"time":self.time_erp,"time1":self.time_mes,"max_delay":self.maxdelay,\
-        "penalty":self.penalty,"start":self.time_inicio,"end":self.time_fim,"penalty_incurred":self.actual_penalty,'estado':self.estado}
-        self.transforma()
-        mutex.acquire()
-        db.insert_order_db('transform', dic)
-        mutex.release()
-        self.calc_penalty()
-        self.tempo_atual()
-
+            self.transforma()
+            mutex.acquire()
+            db.insert_order_db('transform', dic)
+            mutex.release()
+            self.calc_penalty()
+            self.tempo_atual()
+        elif flag==0:
+            self.estado=0
+            self.quantity=mensagem["quantity"]
+            self.quantity1=int(mensagem["quantity1"])  #ja produzidas
+            self.quantity2=int(mensagem["quantity2"])   # em produção
+            self.time_inicio=int(mensagem["start"]) #ST
+            self.time_fim=int(mensagem["end"] )   #ET
+            self.time_mes=int(mensagem["time1"])
+            self.number=int(mensagem["nnn"])
+            self.fro=mensagem["from"]
+            self.to=mensagem["to"]
+            self.time_erp=int(mensagem["time"])
+            self.maxdelay=int(mensagem["max_delay"])
+            self.penalty=int(mensagem["penalty"])
+            self.quantity3=int(mensagem["quantity3"])  #por produzir
+            self.actual_penalty=int(mensagem["penalty_incurred"])
+            self.transforma()
+            self.calc_penalty()
+        elif flag==2:
+            self.estado=1
+            self.quantity=mensagem["quantity"]
+            self.quantity1=int(mensagem["quantity1"])  #ja produzidas
+            self.quantity2=int(mensagem["quantity2"])   # em produção
+            self.time_inicio=int(mensagem["start"]) #ST
+            self.time_fim=int(mensagem["end"] )   #ET
+            self.time_mes=int(mensagem["time1"])
+            self.number=int(mensagem["nnn"])
+            self.fro=mensagem["from"]
+            self.to=mensagem["to"]
+            self.time_erp=int(mensagem["time"])
+            self.maxdelay=int(mensagem["max_delay"])
+            self.penalty=int(mensagem["penalty"])
+            self.quantity3=int(mensagem["quantity3"])  #por produzir
+            self.actual_penalty=int(mensagem["penalty_incurred"])
+            self.transforma()
+            self.calc_penalty()
     def print_info(self):
         print('---------------------------------')
         print('number= ',self.number)
@@ -710,8 +744,7 @@ class manager:
         print('inc=', self.inc)
         self.temp=[0,0,0,0,0,0,0,0,0,0]
         self.temp=self.transf.copy()
-        #self.teste_ler_var(2)
-
+        self.teste_ler_var(2)        
         mutex.acquire()
         x = db.insert_incr(self.inc[1:9])
         self.transf=x.copy()
@@ -814,13 +847,36 @@ lista_descargas_pendentes=[]
 lista_descargas_correntes=[]
 lista_descargas_feitas=[]
 
+
+
 stock=[0,400,40,20,20,20,20,0,0,0]
 db = DataBase("dbConfig.txt")
+'''
 mutex.acquire()
 db.clear_db_tables()
 mutex.release()
-man=manager()
+'''
+mutex.acquire()
+stores=db.request_stores_db()
+mutex.release()
+for i in range(1,10):
+    stock[i]=stores[i-1]
 
+mutex.acquire()
+dic=db.request_orders_db()
+mutex.release()
+
+for l in dic:
+    if l["estado"]==0:
+        lista_ordens_pendentes.append(ordem(l,0))
+    if l["estado"]==1:
+        lista_ordens_pendentes.append(ordem(l,2))
+
+
+
+
+
+man=manager()
 manager_t = threading.Thread(target=loop_man)
 manager_t.start()
 #subprocess.run(["bash", "insert.sh"])
