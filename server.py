@@ -179,8 +179,9 @@ class Ui_MainWindow(object):
         '''
 
         self.table_descargas.setSortingEnabled(__sortingEnabled)
-
-
+        QtCore.QTimer.singleShot(10000, self.rel)
+        self.table_descargas.setSortingEnabled(__sortingEnabled)
+    def rel(self):
         for i in range(0,3):
             for j in range(1,10):
                 if i==0:
@@ -201,7 +202,7 @@ class Ui_MainWindow(object):
         self.table_descargas.setItem(10,0,QtWidgets.QTableWidgetItem(str( sum(man.total_tipo_descarga1))))
         self.table_descargas.setItem(10,1,QtWidgets.QTableWidgetItem(str( sum(man.total_tipo_descarga2))))
         self.table_descargas.setItem(10,2,QtWidgets.QTableWidgetItem(str( sum(man.total_tipo_descarga3))))
-        self.table_descargas.setSortingEnabled(__sortingEnabled)
+
 
 class com_erp:
     def __init__(self,host,port):
@@ -477,9 +478,12 @@ class manager:
                         print('descargas correntes=',len(lista_descargas_correntes))
                 i=i+1
         if self.d1==1:
+            '''
             mutex.acquire()
             dic=db.read_unload_plc_state()
             mutex.release()
+            '''
+            dic=self.teste_ler_descargas()
             if dic[0]==0:
                 self.p1.estado=1
                 self.p1.atualizar_descarga_db()

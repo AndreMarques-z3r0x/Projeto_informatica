@@ -216,8 +216,10 @@ class Ui_ERP(object):
         text=str(data,'utf-8')
         self.lrordens.setText(text)
         self.lrordens.adjustSize()
-
+l=0
 if __name__ == "__main__":
+    print(l)
+    l+=1
     import sys
     app = QtWidgets.QApplication(sys.argv)
     ERP = QtWidgets.QMainWindow()
