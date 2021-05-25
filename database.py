@@ -215,7 +215,12 @@ class DataBase:
                 break
             self.mysqldb.commit()
             __cursor.close()
-        return [0]+__teste[:-1]
+        with open("real_transform.data") as file_in:
+            real_transf = []
+            for line in file_in:
+                real_transf.append(int(line))
+            print("[+] Real transf --> ", real_transf)
+        return [0]+__teste[:-1], real_transf
     
     def tools_change(self, data):
         __msg = "tool "

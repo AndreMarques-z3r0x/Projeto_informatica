@@ -322,9 +322,13 @@ int real_transform()
     int arr[9];
     int* r_values = plc_read_values("transf_real",2,9,arr);
     char buffer[150];
-    for(int i=0;i<8;i++){
-        sprintf(buffer,"%s")
-    }
+    sprintf(buffer,"%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n",r_values[0],r_values[1],r_values[2],r_values[3],r_values[4],r_values[5],r_values[6],r_values[7]);
+    printf("%s",buffer);
+    FILE *f = fopen("real_transform.data","wb");;
+    fprintf(f,"%s\n",buffer);
+    fclose(f);
+    printf("[+] Updated 'real_buffer' file exchange data!");
+
 
 }
 
@@ -375,7 +379,7 @@ int start_stocks_thread()
                 pthread_mutex_unlock(&mtx_mysql);
             }
         }
-
+    real_transform();
     start_estatistica();
     sleep(1);
     }
