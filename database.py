@@ -216,11 +216,11 @@ class DataBase:
             self.mysqldb.commit()
             __cursor.close()
         with open("real_transform.data") as file_in:
-            real_transf = []
+            __real_transf = []
             for line in file_in:
-                real_transf.append(int(line))
-            print("[+] Real transf --> ", real_transf)
-        return [0]+__teste[:-1], real_transf
+                __real_transf.append(int(line))
+            print("[+]RealTransf>", [0] + __real_transf)
+        return [0]+__teste[:-1], [0]+__real_transf
     
     def tools_change(self, data):
         __msg = "tool "
@@ -242,7 +242,7 @@ class DataBase:
                 maquinas.append(x)
                 #print(x)
             #print(maquinas)
-        return maquinas      
+        return maquinas
 
 def socket_send_message(message):
         host = socket.gethostname()  
@@ -312,7 +312,6 @@ def main():
     # if (flag):
     #     socket_send_message("6MaqSt")
     #     flag=0
-    db.read_maq_stat()
     return 0
 
 if __name__ == '__main__':

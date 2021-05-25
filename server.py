@@ -599,7 +599,6 @@ class manager:
         b2=0
         b3=0
         soma=0
-        print('REEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE')
         for ord in lista_ordens_correntes:
 
             b1=b1+ ord.falta_mesmo[1]*15+ord.falta_mesmo[4]*15+ord.falta_mesmo[8]*15
@@ -736,7 +735,7 @@ class manager:
             lista_ordens_pendentes[0].atualizar()
             lista_ordens_correntes.append(lista_ordens_pendentes.pop(0))
 ###########################
-        self.transf2=np.add(self.transf2,inc)
+        self.transf2=np.add(self.transf2,self.inc)
 ######################################
         print('inc=', self.inc)
         self.temp=[0,0,0,0,0,0,0,0,0,0]
@@ -757,7 +756,7 @@ class manager:
 
         dif2=np.subtract(self.transf2,y)
         self.check_order_finish(dif2)
-        self.transf2.copy(y)
+        self.transf2=y.copy()    #self.transf2.copy(y)
 ##############################################################
         j=0
         for i in lista_ordens_correntes:

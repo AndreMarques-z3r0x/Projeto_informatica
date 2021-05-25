@@ -323,11 +323,10 @@ int real_transform()
     int* r_values = plc_read_values("transf_real",2,9,arr);
     char buffer[150];
     sprintf(buffer,"%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n",r_values[0],r_values[1],r_values[2],r_values[3],r_values[4],r_values[5],r_values[6],r_values[7]);
-    printf("%s",buffer);
     FILE *f = fopen("real_transform.data","wb");;
-    fprintf(f,"%s\n",buffer);
+    fprintf(f,"%s",buffer);
     fclose(f);
-    printf("[+] Updated 'real_buffer' file exchange data!");
+    printf("[+] Updated 'real_buffer' file exchange data!\n");
 
 
 }
@@ -420,7 +419,7 @@ int start_estatistica(){
     FILE *f = fopen("maq_data.data","wb");
     fprintf(f,"%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",maq_dados[0],maq_dados[1],maq_dados[2],maq_dados[3],maq_dados[4],maq_dados[5],maq_dados[6],maq_dados[7],maq_dados[8]);
     fclose(f);
-    printf("[+] Updated file exchange data!");
+    printf("[+] Updated file exchange data!\n");
 }
 
 
