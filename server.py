@@ -208,7 +208,6 @@ class Ui_MainWindow(object):
         mutex.acquire()
         maq=db.read_maq_stat()
         mutex.release()
-        maq.append([0,0,0,0,0,0,1,2])
         for i in range(0,8):
             for j in range(1,7):
                 self.table_ordens.setItem(j,i,QtWidgets.QTableWidgetItem(str( maq[i][j-1])))
@@ -781,7 +780,7 @@ class manager:
             print('falta=', i.falta)
             print('falta mesmo=', i.falta_mesmo)
             if sum(i.falta_mesmo)==0:
-                print('pop ',i.falta_mesmo)
+                print('[+]pop Falta mesmo ->  ',i.falta_mesmo)
                 #stock[self.p.index(i.to)]+=i.quantity
                 lista_ordens_correntes[j].time_fim= time.time()
                 lista_ordens_correntes[j].calc_penalty()
@@ -809,6 +808,14 @@ def loop_man():
                 erp.server.close()
                 print('Abortar')
                 break
+        except:
+            print('reeeeeeer')
+            pass
+        try:
+            if keyboard.is_pressed('j'):
+                mutex.acquire()
+                db.clear_db_tables()
+                mutex.release()                
         except:
             print('reeeeeeer')
             pass
@@ -848,11 +855,7 @@ lista_descargas_feitas=[]
 
 stock=[0,400,40,20,20,20,20,0,0,0]
 db = DataBase("dbConfig.txt")
-'''
-mutex.acquire()
-db.clear_db_tables()
-mutex.release()
-'''
+
 mutex.acquire()
 stores=db.request_stores_db()
 mutex.release()

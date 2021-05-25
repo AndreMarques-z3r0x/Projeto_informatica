@@ -235,8 +235,8 @@ class DataBase:
                 lines.append(line)
                 x = [int(n) for n in line.split(",")]
                 maquinas.append(x)
-                print(x)
-            print(maquinas)
+                #print(x)
+            #print(maquinas)
         return maquinas      
 
 def socket_send_message(message):
