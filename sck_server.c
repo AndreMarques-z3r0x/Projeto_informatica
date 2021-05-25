@@ -317,6 +317,17 @@ int create_socket(){
     }
 }
 
+int real_transform()
+{
+    int arr[9];
+    int* r_values = plc_read_values("transf_real",2,9,arr);
+    char buffer[150];
+    for(int i=0;i<8;i++){
+        sprintf(buffer,"%s")
+    }
+
+}
+
 int start_stocks_thread()
 {
     int arr[9];
@@ -407,6 +418,7 @@ int start_estatistica(){
     fclose(f);
     printf("[+] Updated file exchange data!");
 }
+
 
 int main(int argc, char const *argv[])
 {   
