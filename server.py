@@ -468,7 +468,7 @@ class manager:
         self.total_tipo_descarga2=[0,0,0,0,0,0,0,0,0,0]
         self.total_tipo_descarga3=[0,0,0,0,0,0,0,0,0,0]
 
-
+        self.transf2=[0,0,0,0,0,0,0,0,0]
         self.transf=[0,0,0,0,0,0,0,0,0]
         self.inc=[0,0,0,0,0,0,0,0,0]
         self.b=[0,1,2,3,4,5,5,6,6]
@@ -735,14 +735,15 @@ class manager:
             lista_ordens_pendentes[0].estado=1
             lista_ordens_pendentes[0].atualizar()
             lista_ordens_correntes.append(lista_ordens_pendentes.pop(0))
-
-
+###########################
+        self.transf2=np.add(self.transf2,inc)
+######################################
         print('inc=', self.inc)
         self.temp=[0,0,0,0,0,0,0,0,0,0]
         self.temp=self.transf.copy()
-        self.teste_ler_var(2)        
+        #self.teste_ler_var(2)
         mutex.acquire()
-        x = db.insert_incr(self.inc[1:9])
+        x,y= db.insert_incr(self.inc[1:9])
         self.transf=x.copy()
         mutex.release()
 
@@ -752,29 +753,12 @@ class manager:
         for i in range(1,9):
             stock[self.c[i]]+=diference[i]
 
+#############################################################
 
-        self.tempo_oper[1]+=diference[1]*15
-        self.tempo_oper[2]+=diference[2]*15
-        self.tempo_oper[3]+=diference[3]*15
-        self.tempo_oper[4]+=diference[4]*15
-        self.tempo_oper[5]+=diference[5]*30+ diference[6]*30
-        self.tempo_oper[6]+=diference[7]*30+ diference[8]*15
-
-        self.total_tipo[1]+=diference[1]
-        self.total_tipo[2]+=diference[2]
-        self.total_tipo[3]+=diference[3]
-        self.total_tipo[4]+=diference[4]
-        self.total_tipo[5]+=diference[5]
-        self.total_tipo[6]+=diference[6]
-        self.total_tipo[7]+=diference[7]
-        self.total_tipo[8]+=diference[8]
-
-        self.total_peca=sum(self.total_tipo)
-
-
-
-        self.check_order_finish(diference)
-
+        dif2=np.subtract(self.transf2,y)
+        self.check_order_finish(dif2)
+        self.transf2.copy(y)
+##############################################################
         j=0
         for i in lista_ordens_correntes:
             print('falta=', i.falta)
@@ -815,7 +799,7 @@ def loop_man():
             if keyboard.is_pressed('j'):
                 mutex.acquire()
                 db.clear_db_tables()
-                mutex.release()                
+                mutex.release()
         except:
             print('reeeeeeer')
             pass
