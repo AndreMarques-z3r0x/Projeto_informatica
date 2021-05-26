@@ -237,7 +237,7 @@ class com_erp:
 
         if mensagem.tag=='ORDERS':
             for ord in mensagem:
-                 lista_ordens_pendentes.append(ordem(ord))
+                 lista_ordens_pendentes.append(ordem(ord,1))
 
         if mensagem.tag=='Order':
             if mensagem.findall('Transform')!=[]:
@@ -826,7 +826,7 @@ def ui_estat():
 import keyboard
 import numpy as np
 mutex = threading.Lock()
-erp=com_erp("127.0.0.1",55321)
+erp=com_erp("0.0.0.0",54321)
 lista_ordens_pendentes=[]
 lista_ordens_correntes=[]
 lista_ordens_feitas=[]
