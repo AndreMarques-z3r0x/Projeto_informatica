@@ -221,13 +221,14 @@ class com_erp:
     def __init__(self,host,port):
         self.HOST=host
         self.PORT=port
-        self.server = socket(AF_INET, SOCK_DGRAM)
-        print("inicio server")
-        self.server.bind(("0.0.0.0",self.PORT))
+
 
     def read_msg_udp(self):
-            msg=""
-            msg, addr =self.server.recvfrom(10240)
+            self.server = socket(AF_INET, SOCK_DGRAM)
+            print("inicio server")
+            self.server.bind(("0.0.0.0",self.PORT))
+            msg,addr=self.server.recvfrom(1025)
+            self.server.close()
             print("data= ",str(msg,'utf-8'))
             return str(msg,'utf-8'),addr
     def send_msg_udp(self,msg,addr):
@@ -389,6 +390,7 @@ class ordem:
     def tempo_atual(self):
         self.tdecorrer=self.maxdelay-(time.time()-self.time_mes)
         print('falta',self.sec)
+
     def calc_penalty(self):
         self.sec=time.time()-self.time_mes
         if self.sec<self.maxdelay:
@@ -581,7 +583,7 @@ class manager:
     def sort_order(self,lista):
         for l in lista:
             l.tempo_atual()
-        lista.sort(key=lambda x:x.tdecorrer, reverse=False)
+        lista.sort(key=lambda x:x.tdecorrer, reverse=True)
         for l in lista:
             print('sort- ',l.number)
         return lista
@@ -595,16 +597,21 @@ class manager:
                         if pedido.falta_mesmo[s]<0:
                             dif[s]=pedido.falta_mesmo[s]*(-1)
                             pedido.falta_mesmo[s]=0
+
     def ver_maquinas(self):
         b1=0
         b2=0
         b3=0
         soma=0
+        s=0
         for ord in lista_ordens_correntes:
-
             b1=b1+ ord.falta_mesmo[1]*15+ord.falta_mesmo[4]*15+ord.falta_mesmo[8]*15
             b2=b2+ ord.falta_mesmo[2]*15+ord.falta_mesmo[5]*30
             b3=b3+ ord.falta_mesmo[3]*15+ord.falta_mesmo[6]*30+ord.falta_mesmo[7]*30
+            s+=sum(ord.fatla_mesmo)
+            if s>30:
+                break
+
         soma=b1+b2+b3
         k1=0
         k2=0
@@ -736,7 +743,9 @@ class manager:
             lista_ordens_pendentes[0].atualizar()
             lista_ordens_correntes.append(lista_ordens_pendentes.pop(0))
 
+###########################
         self.transf2=np.add(self.transf2,self.inc)
+######################################
 
         print('inc=', self.inc)
         self.temp=[0,0,0,0,0,0,0,0,0,0]
@@ -753,10 +762,12 @@ class manager:
         for i in range(1,9):
             stock[self.c[i]]+=diference[i]
 
+#############################################################
+
         dif2=np.subtract(self.transf2,y)
         self.check_order_finish(dif2)
         self.transf2=y.copy()    #self.transf2.copy(y)
-
+##############################################################
         j=0
         for i in lista_ordens_correntes:
             print('falta=', i.falta)
@@ -779,6 +790,27 @@ def loop_man():
 
         if lista_ordens_pendentes!=[] or lista_ordens_correntes!=[] or sum(man.transf)!=0:
             man.sort_order(lista_ordens_pendentes)
+            man.sort_order(lista_ordens_correntes)
+            s=0
+            j=0
+            for i in range(0,len(lista_ordens_correntes)):
+                if(lista_ordens_pendentes[j].tdecorrer<lista_ordens_pendentes[i].tdecorrer):
+                    lista_ordens_pendentes[j].time_inicio=time.time()
+                    lista_ordens_pendentes[j].estado=1
+                    lista_ordens_pendentes[j].atualizar()
+                    lista_ordens_correntes.append(lista_ordens_pendentes.pop(j))
+                    man.sort_order(lista_ordens_correntes)
+                    print('MAAAAAAAAAAAAAAAAAAANDOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO')
+                    break
+                s+=sum(lista_ordens_correntes[i].fatla_mesmo)
+                if s>30:
+                    break
+            
+
+
+
+
+
             man.ver_maquinas()
             man.loop_teste()
 
