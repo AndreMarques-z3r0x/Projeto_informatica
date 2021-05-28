@@ -204,7 +204,7 @@ class Ui_MainWindow(object):
         self.table_descargas.setItem(10,0,QtWidgets.QTableWidgetItem(str( sum(man.total_tipo_descarga1))))
         self.table_descargas.setItem(10,1,QtWidgets.QTableWidgetItem(str( sum(man.total_tipo_descarga2))))
         self.table_descargas.setItem(10,2,QtWidgets.QTableWidgetItem(str( sum(man.total_tipo_descarga3))))
-        #maq=[[0,0,0,0,0,0],[1,1,1,1,1,1],[2,2,2,2,0,0],[3,0,0,0,0,0],[0,4,0,0,0,0],[0,5,0,0,0,0,],[0,6,0,0,0,0],[7,0,0,0,0,0],[0,0,0,0,0,0,1,2]]
+        #maq=[[0,0,0,0,0,0],[1,1,1,1,1,1],[2,2,2,2,0,0],[3,0,0,0,0,0],[0,4,0,0,0,0],[0,5,0,0,0,0,],[0,6,0,0,0,0],[7,0,0,0,0,0],[0,0,0,0,0,0,1,2]]huhiuooosososo
         mutex.acquire()
         maq=db.read_maq_stat()
         mutex.release()
@@ -221,12 +221,14 @@ class com_erp:
     def __init__(self,host,port):
         self.HOST=host
         self.PORT=port
-        self.server = socket(AF_INET, SOCK_DGRAM)
-        print("inicio server")
-        self.server.bind(("0.0.0.0",self.PORT))
+
 
     def read_msg_udp(self):
+            self.server = socket(AF_INET, SOCK_DGRAM)
+            print("inicio server")
+            self.server.bind(("0.0.0.0",self.PORT))
             msg,addr=self.server.recvfrom(1025)
+            self.server.close()
             print("data= ",str(msg,'utf-8'))
             return str(msg,'utf-8'),addr
     def send_msg_udp(self,msg,addr):
@@ -527,12 +529,12 @@ class manager:
                         print('descargas correntes=',len(lista_descargas_correntes))
                 i=i+1
         if self.d1==1:
-            '''
+
             mutex.acquire()
             dic=db.read_unload_plc_state()
             mutex.release()
-            '''
-            dic=self.teste_ler_descargas()
+
+            #dic=self.teste_ler_descargas()
             if dic[0]==0:
                 self.p1.estado=1
                 self.p1.atualizar_descarga_db()
@@ -807,17 +809,11 @@ def loop_man():
 def ui_estat():
 
     ap = QtWidgets.QApplication(sys.argv)
-    print("11111111111111111111111111111111")
     MainWindo = QtWidgets.QMainWindow()
-    print("222222222222222222222222222222222")
     ui_estat = Ui_MainWindow()
-    print("333333333333333333333333333333333")
     ui_estat.setupUi(MainWindo)
-    print("44444444444444444444444444444444")
     MainWindo.show()
-    print("555555555555555555555555555555555")
     sys.exit(ap.exec_())
-    print("69696969696969696969696969696969")
 
 
 
@@ -870,6 +866,7 @@ ui_estat_t.start()
 
 if __name__ == '__main__':
     while 1:
+        print('cona')
         msg,addr=erp.read_msg_udp()
         erp.parse_info(msg,addr)
         print('desc pend=',len(lista_descargas_pendentes))
