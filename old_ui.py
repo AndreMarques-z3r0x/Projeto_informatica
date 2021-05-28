@@ -174,7 +174,7 @@ class Ui_ERP(object):
         self.id=0
         self.idd=0
         self.HOST='localhost'
-        self.PORT=55321
+        self.PORT=54321
         self.clt = socket(AF_INET,SOCK_DGRAM)
         self.pordem.clicked.connect(lambda: self.send_order())
         self.pdescarga.clicked.connect(lambda: self.send_descarga())

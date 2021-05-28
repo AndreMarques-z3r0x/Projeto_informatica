@@ -221,14 +221,13 @@ class com_erp:
     def __init__(self,host,port):
         self.HOST=host
         self.PORT=port
-
+        self.server = socket(AF_INET, SOCK_DGRAM)
+        print("inicio server")
+        self.server.bind(("0.0.0.0",self.PORT))
 
     def read_msg_udp(self):
-            self.server = socket(AF_INET, SOCK_DGRAM)
-            print("inicio server")
-            self.server.bind(("0.0.0.0",self.PORT))
-            msg,addr=self.server.recvfrom(1025)
-            self.server.close()
+            msg=""
+            msg, addr =self.server.recvfrom(10240)
             print("data= ",str(msg,'utf-8'))
             return str(msg,'utf-8'),addr
     def send_msg_udp(self,msg,addr):
@@ -582,7 +581,7 @@ class manager:
     def sort_order(self,lista):
         for l in lista:
             l.tempo_atual()
-        lista.sort(key=lambda x:x.tdecorrer, reverse=True)
+        lista.sort(key=lambda x:x.tdecorrer, reverse=False)
         for l in lista:
             print('sort- ',l.number)
         return lista
@@ -736,9 +735,9 @@ class manager:
             lista_ordens_pendentes[0].estado=1
             lista_ordens_pendentes[0].atualizar()
             lista_ordens_correntes.append(lista_ordens_pendentes.pop(0))
-###########################
+
         self.transf2=np.add(self.transf2,self.inc)
-######################################
+
         print('inc=', self.inc)
         self.temp=[0,0,0,0,0,0,0,0,0,0]
         self.temp=self.transf.copy()
@@ -754,12 +753,10 @@ class manager:
         for i in range(1,9):
             stock[self.c[i]]+=diference[i]
 
-#############################################################
-
         dif2=np.subtract(self.transf2,y)
         self.check_order_finish(dif2)
         self.transf2=y.copy()    #self.transf2.copy(y)
-##############################################################
+
         j=0
         for i in lista_ordens_correntes:
             print('falta=', i.falta)
