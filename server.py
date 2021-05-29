@@ -229,7 +229,7 @@ class com_erp:
             self.server = socket(AF_INET, SOCK_DGRAM)
             print("inicio server")
             self.server.bind(("0.0.0.0",self.PORT))
-            msg,addr=self.server.recvfrom(10000)
+            msg,addr=self.server.recvfrom(100000)
             self.server.close()
             print("data= ",str(msg,'utf-8'))
             return str(msg,'utf-8'),addr
@@ -320,11 +320,13 @@ class ordem:
             self.quantity3=self.quantity  #por produzir
 
             self.actual_penalty=0
-            dic={"nnn":self.number,"from":self.fro,"to":self.to,"quantity":self.quantity,"quantity1":self.quantity1,"quantity2": self.quantity2,\
-            "quantity3":self.quantity3,"time":self.time_erp,"time1":self.time_mes,"max_delay":self.maxdelay,\
-            "penalty":self.penalty,"start":self.time_inicio,"end":self.time_fim,"penalty_incurred":self.actual_penalty,'estado':self.estado}
+            
 
             self.transforma()
+            dic={"nnn":self.number,"from":self.fro,"to":self.to,"quantity":self.quantity,"quantity1":self.quantity1,"quantity2": self.quantity2,\
+            "quantity3":self.quantity3,"time":self.time_erp,"time1":self.time_mes,"max_delay":self.maxdelay,\
+            "penalty":self.penalty,"start":self.time_inicio,"end":self.time_fim,"penalty_incurred":self.actual_penalty,'estado':self.estado,'falta':self.falta,'falta_mesmo':self.falta_mesmo}
+
             mutex.acquire()
             db.insert_order_db('transform', dic)
             mutex.release()
@@ -347,6 +349,8 @@ class ordem:
             self.quantity3=int(mensagem["quantity3"])  #por produzir
             self.actual_penalty=int(mensagem["penalty_incurred"])
             self.transforma()
+            self.falta=int(mensagem["falta"])
+            self.falta_mesmo=int(mensagem["falta_mesmo"])
             self.calc_penalty()
         elif flag==2:
             self.estado=1
@@ -365,6 +369,8 @@ class ordem:
             self.quantity3=int(mensagem["quantity3"])  #por produzir
             self.actual_penalty=int(mensagem["penalty_incurred"])
             self.transforma()
+            self.falta=int(mensagem["falta"])
+            self.falta_mesmo=int(mensagem["falta_mesmo"])
             self.calc_penalty()
         self.raciopen= self.penalty/sum(self.transf)
         self.emergencia = (self.maxdelay<=50)
@@ -386,7 +392,7 @@ class ordem:
             self.calc_penalty()
         dic={"nnn":self.number,"from":self.fro,"to":self.to,"quantity":self.quantity,"quantity1":self.quantity1,"quantity2": self.quantity2,\
         "quantity3":self.quantity3,"time":self.time_erp,"time1":self.time_mes,"max_delay":self.maxdelay,\
-        "penalty":self.penalty,"start":self.time_inicio,"end":self.time_fim,"penalty_incurred":self.actual_penalty,'estado':self.estado}
+        "penalty":self.penalty,"start":self.time_inicio,"end":self.time_fim,"penalty_incurred":self.actual_penalty,'estado':self.estado,'falta':self.falta,'falta_mesmo':self.falta_mesmo}
         mutex.acquire()
         db.update_order_db('transform', dic)
         mutex.release()
@@ -502,7 +508,7 @@ class manager:
         if (self.d1+self.d2+self.d3)<3:
             i=0
             for desc in lista_descargas_pendentes:
-                if desc.destino =='P1' and self.d1==0:
+                if desc.destino =='D1' and self.d1==0:
                     if desc.quantity<=stock[self.p.index(desc.tipo)]:
                         self.d1=1
                         lista_descargas_correntes.append(desc)
@@ -512,7 +518,7 @@ class manager:
                         mutex.release()
                         lista_descargas_pendentes.pop(i)
                         print('descargas correntes=',len(lista_descargas_correntes))
-                elif desc.destino =='P2' and self.d2==0:
+                elif desc.destino =='D2' and self.d2==0:
                     if desc.quantity<=stock[self.p.index(desc.tipo)]:
                         self.d2=1
                         lista_descargas_correntes.append(desc)
@@ -522,7 +528,7 @@ class manager:
                         mutex.release()
                         lista_descargas_pendentes.pop(i)
                         print('descargas correntes=',len(lista_descargas_correntes))
-                elif desc.destino =='P3' and self.d3==0:
+                elif desc.destino =='D3' and self.d3==0:
                     if desc.quantity<=stock[self.p.index(desc.tipo)]:
                         self.d3=1
                         lista_descargas_correntes.append(desc)
@@ -660,12 +666,18 @@ class manager:
         b3=0
         soma=0
         s=0
+        ree=0
         for ord in lista_ordens_correntes:
             b1=b1+ ord.falta_mesmo[1]*15+ord.falta_mesmo[4]*15+ord.falta_mesmo[8]*15
             b2=b2+ ord.falta_mesmo[2]*15+ord.falta_mesmo[5]*30
             b3=b3+ ord.falta_mesmo[3]*15+ord.falta_mesmo[6]*30+ord.falta_mesmo[7]*30
             s+=sum(ord.falta_mesmo)
+            ree+=1
             if s>30:
+                if s>50 and ree>2:
+                    b1=b1- ord.falta_mesmo[1]*15-ord.falta_mesmo[4]*15-ord.falta_mesmo[8]*15
+                    b2=b2- ord.falta_mesmo[2]*15-ord.falta_mesmo[5]*30
+                    b3=b3- ord.falta_mesmo[3]*15-ord.falta_mesmo[6]*30-ord.falta_mesmo[7]*30
                 break
 
         soma=b1+b2+b3
@@ -835,6 +847,9 @@ class manager:
                 lista_ordens_correntes[j].atualizar()
                 lista_ordens_feitas.append(lista_ordens_correntes.pop(j))
             j=j+1
+        for ord in lista_descargas_correntes:
+            ord.atualizar()
+        #MANDAR PARA O ANTRE O TRANSF2
         print('stock',stock)
         print('----------')
 
@@ -942,18 +957,32 @@ for i in range(1,10):
 mutex.acquire()
 dic=db.request_orders_db()
 mutex.release()
-
+ff=0
 for l in dic:
     if l["estado"]==0:
         lista_ordens_pendentes.append(ordem(l,0))
+        ff=1
     if l["estado"]==1:
         lista_ordens_pendentes.append(ordem(l,2))
-
-
-
+        ff=1
 
 
 man=manager()
+###############################################################################################################
+if ff:
+    time.sleep(2)
+    mutex.acquire()
+    man.transf,man.transf2= db.insert_incr([0,0,0,0,0,0,0,0])
+    mutex.release()
+
+    transfdb2=[]
+
+    transfdb2.copy(man.transf2)#tenho de ler do andre
+    dif2=np.subtract(transfdb2,man.transf2)
+    if sum(dif2!=0):
+        man.check_order_finish(dif2)
+##########################################################################################################
+
 manager_t = threading.Thread(target=loop_man)
 manager_t.start()
 #subprocess.run(["bash", "insert.sh"])
