@@ -7,10 +7,12 @@ import threading
 import subprocess
 import sys
 
+
+
 from old_ui import Ui_ERP
 #from ui import Ui_MainWindow
 from PyQt5 import QtCore, QtGui, QtWidgets
-i=0
+
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -221,13 +223,14 @@ class com_erp:
     def __init__(self,host,port):
         self.HOST=host
         self.PORT=port
-        self.server = socket(AF_INET, SOCK_DGRAM)
-        print("inicio server")
-        self.server.bind(("0.0.0.0",self.PORT))
+
 
     def read_msg_udp(self):
-            msg=""
-            msg, addr =self.server.recvfrom(10240)
+            self.server = socket(AF_INET, SOCK_DGRAM)
+            print("inicio server")
+            self.server.bind(("0.0.0.0",self.PORT))
+            msg,addr=self.server.recvfrom(10000)
+            self.server.close()
             print("data= ",str(msg,'utf-8'))
             return str(msg,'utf-8'),addr
     def send_msg_udp(self,msg,addr):
@@ -363,6 +366,8 @@ class ordem:
             self.actual_penalty=int(mensagem["penalty_incurred"])
             self.transforma()
             self.calc_penalty()
+        self.raciopen= self.penalty/sum(self.transf)
+        self.emergencia = (self.maxdelay<=50)
     def print_info(self):
         print('---------------------------------')
         print('number= ',self.number)
@@ -388,7 +393,8 @@ class ordem:
 
     def tempo_atual(self):
         self.tdecorrer=self.maxdelay-(time.time()-self.time_mes)
-        print('falta',self.sec)
+        print('falta ordem tdecorrer',self.tdecorrer)
+
     def calc_penalty(self):
         self.sec=time.time()-self.time_mes
         if self.sec<self.maxdelay:
@@ -579,12 +585,64 @@ class manager:
             else:
                 self.transf[i]=0
     def sort_order(self,lista):
-        for l in lista:
-            l.tempo_atual()
-        lista.sort(key=lambda x:x.tdecorrer, reverse=False)
-        for l in lista:
-            print('sort- ',l.number)
-        return lista
+        if lista:
+            m=[]
+            for i in range(len(lista_ordens_pendentes)):
+                if i<len(lista_ordens_pendentes):
+                    lista_ordens_pendentes[i].tempo_atual()
+                    if lista_ordens_pendentes[i].emergencia:
+                        m.append(lista_ordens_pendentes.pop(i))
+                        i-=1
+                else:
+                    break
+            m.sort(key=lambda x:x.raciopen, reverse=False)
+            lista_ordens_pendentes.sort(key=lambda x:x.tdecorrer, reverse=False)
+            flag=1
+            if len(lista_ordens_pendentes)>1:
+                while flag==1:
+                    flag=0
+                    for l in range(0,len(lista_ordens_pendentes)-1):
+                            if lista_ordens_pendentes[l].tdecorrer>lista_ordens_pendentes[l+1].tdecorrer-15 and lista_ordens_pendentes[l+1].raciopen>lista_ordens_pendentes[l].raciopen:
+                                temp=lista_ordens_pendentes[l]
+                                lista_ordens_pendentes[l]=lista_ordens_pendentes[l+1]
+                                lista_ordens_pendentes[l+1]=temp
+                                flag=1
+            print("len m --> ", len(m), "     len ordens pendentes ", len(lista_ordens_pendentes))
+            if m !=[]:
+                print("M    Emergencia flag!!! -->",m[0].emergencia)
+                for k in range(len(m)):
+                    lista_ordens_pendentes.insert(k,m[k])
+                print("Lista ordens pendentes    Emergencia flag!!! -->",lista_ordens_pendentes[0].emergencia)
+            print("len m --> ", len(m), "     len ordens pendentes ", len(lista_ordens_pendentes))
+        else:
+            m=[]
+            for i in range(len(lista_ordens_correntes)):
+                if i<len(lista_ordens_correntes):
+                    lista_ordens_correntes[i].tempo_atual()
+                    if lista_ordens_correntes[i].emergencia:
+                        m.append(lista_ordens_correntes.pop(i))
+                        i-=1
+                else:
+                    break
+            m.sort(key=lambda x:x.raciopen, reverse=False)
+            lista_ordens_correntes.sort(key=lambda x:x.tdecorrer, reverse=False)
+            flag=1
+            if len(lista_ordens_correntes)>1:
+                while flag==1:
+                    flag=0
+                    for l in range(0,len(lista_ordens_correntes)-1):
+                            if lista_ordens_correntes[l].tdecorrer>lista_ordens_correntes[l+1].tdecorrer-15 and lista_ordens_correntes[l+1].raciopen>lista_ordens_correntes[l].raciopen:
+                                temp=lista_ordens_correntes[l]
+                                lista_ordens_correntes[l]=lista_ordens_correntes[l+1]
+                                lista_ordens_correntes[l+1]=temp
+                                flag=1
+            if m !=[]:
+                for k in range(len(m)):
+                    lista_ordens_correntes.insert(k,m[k])
+        return 0
+
+
+
     def check_order_finish(self,dif):
         for pedido in lista_ordens_correntes:
             for s in range(1,9):
@@ -595,16 +653,21 @@ class manager:
                         if pedido.falta_mesmo[s]<0:
                             dif[s]=pedido.falta_mesmo[s]*(-1)
                             pedido.falta_mesmo[s]=0
+
     def ver_maquinas(self):
         b1=0
         b2=0
         b3=0
         soma=0
+        s=0
         for ord in lista_ordens_correntes:
-
             b1=b1+ ord.falta_mesmo[1]*15+ord.falta_mesmo[4]*15+ord.falta_mesmo[8]*15
             b2=b2+ ord.falta_mesmo[2]*15+ord.falta_mesmo[5]*30
             b3=b3+ ord.falta_mesmo[3]*15+ord.falta_mesmo[6]*30+ord.falta_mesmo[7]*30
+            s+=sum(ord.falta_mesmo)
+            if s>30:
+                break
+
         soma=b1+b2+b3
         k1=0
         k2=0
@@ -736,7 +799,9 @@ class manager:
             lista_ordens_pendentes[0].atualizar()
             lista_ordens_correntes.append(lista_ordens_pendentes.pop(0))
 
+
         self.transf2=np.add(self.transf2,self.inc)
+
 
         print('inc=', self.inc)
         self.temp=[0,0,0,0,0,0,0,0,0,0]
@@ -746,12 +811,12 @@ class manager:
         x,y= db.insert_incr(self.inc[1:9])
         self.transf=x.copy()
         mutex.release()
-
         diference=np.subtract(self.temp,self.transf)
 
         print('DIFERENCE->',diference)
         for i in range(1,9):
             stock[self.c[i]]+=diference[i]
+
 
         dif2=np.subtract(self.transf2,y)
         self.check_order_finish(dif2)
@@ -774,11 +839,58 @@ class manager:
         print('----------')
 
 
-def loop_man():
-    while 1:
+def ui_estat():
 
-        if lista_ordens_pendentes!=[] or lista_ordens_correntes!=[] or sum(man.transf)!=0:
-            man.sort_order(lista_ordens_pendentes)
+    ap = QtWidgets.QApplication(sys.argv)
+    MainWindo = QtWidgets.QMainWindow()
+    ui_estat = Ui_MainWindow()
+    ui_estat.setupUi(MainWindo)
+    MainWindo.show()
+    sys.exit(ap.exec_())
+
+def loop_man():
+    #global lista_ordens_pendentes
+    #global lista_ordens_correntes
+    while 1:
+        if lista_ordens_pendentes!=[] or lista_ordens_correntes!=[] or sum(man.transf)!=0:            
+            print("LEEEEEEEEEEEEEENNNNNNNNNNNNNNNNN: --> ", len(lista_ordens_pendentes))
+            man.sort_order(1)       # 1- pendentes   0-> correntes
+            print("LEEEEEEEEEEEEEENNNNNNNNNNNNNNNNN: --> ", len(lista_ordens_pendentes))
+            if lista_ordens_pendentes!=[]:
+                for i in range(0,len(lista_ordens_pendentes)):
+                    if i<len(lista_ordens_pendentes):
+                        if lista_ordens_pendentes[i].emergencia:
+                            lista_ordens_pendentes[i].time_inicio=time.time()
+                            lista_ordens_pendentes[i].estado=1
+                            lista_ordens_pendentes[i].atualizar()
+                            lista_ordens_correntes.append(lista_ordens_pendentes.pop(i))
+                            i-=1
+                    else:
+                        break
+            man.sort_order(0)
+            s=0
+            j=0
+            flag=0
+            lenpend=len(lista_ordens_correntes)
+                    	
+            if lista_ordens_pendentes!=[] and lista_ordens_correntes!=[]:
+                for i in range(0,lenpend):
+                    if(lista_ordens_pendentes[0].tdecorrer-lista_ordens_correntes[i].tdecorrer<15 and lista_ordens_pendentes[0].tdecorrer-lista_ordens_correntes[i].tdecorrer>-15 and lista_ordens_pendentes[0].raciopen>lista_ordens_correntes[i].raciopen):
+                        lista_ordens_pendentes[0].time_inicio=time.time()
+                        lista_ordens_pendentes[0].estado=1
+                        lista_ordens_pendentes[0].atualizar()
+                        lista_ordens_correntes.append(lista_ordens_pendentes.pop(0))
+                        man.sort_order(0)
+                        break
+                    s+=sum(lista_ordens_correntes[i].falta_mesmo)
+                    if s>30:
+                        break
+            
+
+
+
+
+
             man.ver_maquinas()
             man.loop_teste()
 
@@ -803,31 +915,20 @@ def loop_man():
             pass
 
 
-def ui_estat():
-
-    ap = QtWidgets.QApplication(sys.argv)
-    MainWindo = QtWidgets.QMainWindow()
-    ui_estat = Ui_MainWindow()
-    ui_estat.setupUi(MainWindo)
-    MainWindo.show()
-    sys.exit(ap.exec_())
-
-
-
 
 
 import keyboard
 import numpy as np
 mutex = threading.Lock()
 erp=com_erp("0.0.0.0",54321)
-lista_ordens_pendentes=[]
+
+lista_ordens_pendentes = []
+lista_ordens_correntes = []
 lista_ordens_correntes=[]
 lista_ordens_feitas=[]
 lista_descargas_pendentes=[]
 lista_descargas_correntes=[]
 lista_descargas_feitas=[]
-
-
 
 stock=[0,400,40,20,20,20,20,0,0,0]
 db = DataBase("dbConfig.txt")
@@ -863,7 +964,6 @@ ui_estat_t.start()
 
 if __name__ == '__main__':
     while 1:
-        print('cona')
         msg,addr=erp.read_msg_udp()
         erp.parse_info(msg,addr)
         print('desc pend=',len(lista_descargas_pendentes))
