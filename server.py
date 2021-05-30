@@ -325,7 +325,7 @@ class ordem:
             self.transforma()
             dic={"nnn":self.number,"from":self.fro,"to":self.to,"quantity":self.quantity,"quantity1":self.quantity1,"quantity2": self.quantity2,\
             "quantity3":self.quantity3,"time":self.time_erp,"time1":self.time_mes,"max_delay":self.maxdelay,\
-            "penalty":self.penalty,"start":self.time_inicio,"end":self.time_fim,"penalty_incurred":self.actual_penalty,'estado':self.estado,'falta':self.falta,'falta_mesmo':self.falta_mesmo}
+            "penalty":self.penalty,"start":self.time_inicio,"end":self.time_fim,"penalty_incurred":self.actual_penalty,'estado':self.estado,'falta':str(self.falta),'falta_mesmo':str(self.falta_mesmo)}
 
             mutex.acquire()
             db.insert_order_db('transform', dic)
@@ -349,9 +349,10 @@ class ordem:
             self.quantity3=int(mensagem["quantity3"])  #por produzir
             self.actual_penalty=int(mensagem["penalty_incurred"])
             self.transforma()
-            self.falta=int(mensagem["falta"])
-            self.falta_mesmo=int(mensagem["falta_mesmo"])
+            self.falta= [int(n) for n in mensagem["falta"].strip('][').split(",")]     #int(mensagem["falta"])
+            self.falta_mesmo= [int(n) for n in mensagem["falta_mesmo"].strip('][').split(",")]        #int(mensagem["falta_mesmo"])
             self.calc_penalty()
+            self.tempo_atual()
         elif flag==2:
             self.estado=1
             self.quantity=mensagem["quantity"]
@@ -369,9 +370,10 @@ class ordem:
             self.quantity3=int(mensagem["quantity3"])  #por produzir
             self.actual_penalty=int(mensagem["penalty_incurred"])
             self.transforma()
-            self.falta=int(mensagem["falta"])
-            self.falta_mesmo=int(mensagem["falta_mesmo"])
+            self.falta= [int(n) for n in mensagem["falta"].strip('][').split(",")]     #int(mensagem["falta"])
+            self.falta_mesmo= [int(n) for n in mensagem["falta_mesmo"].strip('][').split(",")]        #int(mensagem["falta_mesmo"])
             self.calc_penalty()
+            self.tempo_atual()
         self.raciopen= self.penalty/sum(self.transf)
         self.emergencia = (self.maxdelay<=50)
     def print_info(self):
@@ -392,7 +394,7 @@ class ordem:
             self.calc_penalty()
         dic={"nnn":self.number,"from":self.fro,"to":self.to,"quantity":self.quantity,"quantity1":self.quantity1,"quantity2": self.quantity2,\
         "quantity3":self.quantity3,"time":self.time_erp,"time1":self.time_mes,"max_delay":self.maxdelay,\
-        "penalty":self.penalty,"start":self.time_inicio,"end":self.time_fim,"penalty_incurred":self.actual_penalty,'estado':self.estado,'falta':self.falta,'falta_mesmo':self.falta_mesmo}
+        "penalty":self.penalty,"start":self.time_inicio,"end":self.time_fim,"penalty_incurred":self.actual_penalty,'estado':self.estado,'falta':str(self.falta),'falta_mesmo':str(self.falta_mesmo)}
         mutex.acquire()
         db.update_order_db('transform', dic)
         mutex.release()
@@ -674,11 +676,18 @@ class manager:
             s+=sum(ord.falta_mesmo)
             ree+=1
             if s>30:
-                if s>50 and ree>2:
+                if s>50 and (ree>1 and lista_ordens_correntes[0].raciopen>200 or ree>2):
                     b1=b1- ord.falta_mesmo[1]*15-ord.falta_mesmo[4]*15-ord.falta_mesmo[8]*15
                     b2=b2- ord.falta_mesmo[2]*15-ord.falta_mesmo[5]*30
                     b3=b3- ord.falta_mesmo[3]*15-ord.falta_mesmo[6]*30-ord.falta_mesmo[7]*30
+                    ree-=1
                 break
+
+        if ree==len(lista_ordens_correntes) or lista_ordens_correntes[0].raciopen>200:
+            self.soma_buff=20
+        else:
+            self.soma_buff=40
+
 
         soma=b1+b2+b3
         k1=0
@@ -918,12 +927,6 @@ def loop_man():
 
         try:
             if keyboard.is_pressed('a'):
-                transf2=[0,0,0,0,0,0,0,0,0]
-                with open('transf2.txt','w') as fd:
-                    str='{},{},{},{},{},{},{},{},{}'.format(transf2[0],transf2[1],transf2[2],transf2[3],transf2[4],transf2[5],transf2[6],transf2[7],transf2[8])
-                    fd.write(str)
-                    fd.close()
-
                 erp.server.close()
                 print('Abortar')
                 break
@@ -991,7 +994,7 @@ if ff:
     with open('transf2.txt') as fd:
         read=csv.reader(fd)
         for f in read:
-            for i in range(0,9)
+            for i in range(0,9):
                 transfdb2[i]=int(f[i])
         fd.close()
     time.sleep(2)

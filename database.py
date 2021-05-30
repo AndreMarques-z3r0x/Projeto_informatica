@@ -253,6 +253,30 @@ class DataBase:
             #print(maquinas)
         return maquinas
 
+    def request_unloads_db(self):
+        __query = "SELECT * FROM unload;"
+        cursor = self.mysqldb.cursor()
+        cursor.execute(__query)
+        __unloads = []
+        __unload = {}
+        for row in cursor.fetchall():
+            try:
+                __unload = {
+                    'nnn': row[0],
+                    'type': row[1],
+                    'destination': row[2],
+                    'quantity': row[3],
+                    'estado':row[4]
+                }
+            except ValueError:
+                print("error while fetching data")
+                return 1
+            finally:
+                __unloads.append(__unload)
+        return __unloads
+
+
+
 def socket_send_message(message):
         host = socket.gethostname()  
         port = 4455 
