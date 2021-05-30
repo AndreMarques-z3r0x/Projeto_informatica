@@ -320,7 +320,7 @@ class ordem:
             self.quantity3=self.quantity  #por produzir
 
             self.actual_penalty=0
-            
+
 
             self.transforma()
             dic={"nnn":self.number,"from":self.fro,"to":self.to,"quantity":self.quantity,"quantity1":self.quantity1,"quantity2": self.quantity2,\
@@ -849,7 +849,11 @@ class manager:
             j=j+1
         for ord in lista_descargas_correntes:
             ord.atualizar()
-        #MANDAR PARA O ANTRE O TRANSF2
+
+        with open('transf2.txt','w') as fd:
+            str='{},{},{},{},{},{},{},{},{}'.format(self.transf2[0],self.transf2[1],self.transf2[2],self.transf2[3],self.transf2[4],self.transf2[5],self.transf2[6],self.transf2[7],self.transf2[8])
+            fd.write(str)
+            fd.close()
         print('stock',stock)
         print('----------')
 
@@ -867,7 +871,7 @@ def loop_man():
     #global lista_ordens_pendentes
     #global lista_ordens_correntes
     while 1:
-        if lista_ordens_pendentes!=[] or lista_ordens_correntes!=[] or sum(man.transf)!=0:            
+        if lista_ordens_pendentes!=[] or lista_ordens_correntes!=[] or sum(man.transf)!=0:
             print("LEEEEEEEEEEEEEENNNNNNNNNNNNNNNNN: --> ", len(lista_ordens_pendentes))
             man.sort_order(1)       # 1- pendentes   0-> correntes
             print("LEEEEEEEEEEEEEENNNNNNNNNNNNNNNNN: --> ", len(lista_ordens_pendentes))
@@ -887,7 +891,7 @@ def loop_man():
             j=0
             flag=0
             lenpend=len(lista_ordens_correntes)
-                    	
+
             if lista_ordens_pendentes!=[] and lista_ordens_correntes!=[]:
                 for i in range(0,lenpend):
                     if(lista_ordens_pendentes[0].tdecorrer-lista_ordens_correntes[i].tdecorrer<15 and lista_ordens_pendentes[0].tdecorrer-lista_ordens_correntes[i].tdecorrer>-15 and lista_ordens_pendentes[0].raciopen>lista_ordens_correntes[i].raciopen):
@@ -900,7 +904,7 @@ def loop_man():
                     s+=sum(lista_ordens_correntes[i].falta_mesmo)
                     if s>30:
                         break
-            
+
 
 
 
@@ -914,9 +918,16 @@ def loop_man():
 
         try:
             if keyboard.is_pressed('a'):
+                transf2=[0,0,0,0,0,0,0,0,0]
+                with open('transf2.txt','w') as fd:
+                    str='{},{},{},{},{},{},{},{},{}'.format(transf2[0],transf2[1],transf2[2],transf2[3],transf2[4],transf2[5],transf2[6],transf2[7],transf2[8])
+                    fd.write(str)
+                    fd.close()
+
                 erp.server.close()
                 print('Abortar')
                 break
+
         except:
             print('reeeeeeer')
             pass
@@ -925,6 +936,11 @@ def loop_man():
                 mutex.acquire()
                 db.clear_db_tables()
                 mutex.release()
+                transf2=[0,0,0,0,0,0,0,0,0]
+                with open('transf2.txt','w') as fd:
+                    str='{},{},{},{},{},{},{},{},{}'.format(transf2[0],transf2[1],transf2[2],transf2[3],transf2[4],transf2[5],transf2[6],transf2[7],transf2[8])
+                    fd.write(str)
+                    fd.close()
         except:
             print('reeeeeeer')
             pass
@@ -933,6 +949,7 @@ def loop_man():
 
 
 import keyboard
+import csv
 import numpy as np
 mutex = threading.Lock()
 erp=com_erp("0.0.0.0",54321)
@@ -970,14 +987,18 @@ for l in dic:
 man=manager()
 ###############################################################################################################
 if ff:
+    transfdb2=[0,0,0,0,0,0,0,0,0]
+    with open('transf2.txt') as fd:
+        read=csv.reader(fd)
+        for f in read:
+            for i in range(0,9)
+                transfdb2[i]=int(f[i])
+        fd.close()
     time.sleep(2)
     mutex.acquire()
     man.transf,man.transf2= db.insert_incr([0,0,0,0,0,0,0,0])
     mutex.release()
 
-    transfdb2=[]
-
-    transfdb2.copy(man.transf2)#tenho de ler do andre
     dif2=np.subtract(transfdb2,man.transf2)
     if sum(dif2!=0):
         man.check_order_finish(dif2)
