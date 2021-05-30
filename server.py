@@ -553,7 +553,9 @@ class manager:
             #dic=self.teste_ler_descargas()
             if dic[0]==0:
                 self.p1.estado=1
+                mutex.acquire()
                 self.p1.atualizar_descarga_db()
+                mutex.release()
                 self.total_descarga1+=self.p1.quantity
                 self.total_tipo_descarga1[int(self.p1.tipo[1:])]+=self.p1.quantity
                 print("[+] Total Tipo -->",self.total_tipo_descarga1)
@@ -568,7 +570,9 @@ class manager:
             mutex.release()
             if dic[1]==0:
                 self.p2.estado=1
+                mutex.acquire()
                 self.p2.atualizar_descarga_db()
+                mutex.release()
                 self.total_descarga2+=self.p2.quantity
                 self.total_tipo_descarga2[int(self.p2.tipo[1:])]+=self.p2.quantity
                 lista_descargas_feitas.append(self.p2)
@@ -580,7 +584,9 @@ class manager:
             mutex.release()
             if dic[2]==0:
                 self.p3.estado=1
+                mutex.acquire()
                 self.p3.atualizar_descarga_db()
+                mutex.release()
                 self.total_descarga3+=self.p3.quantity
                 self.total_tipo_descarga3[int(self.p3.tipo[1:])]+=self.p3.quantity
                 lista_descargas_feitas.append(self.p3)
