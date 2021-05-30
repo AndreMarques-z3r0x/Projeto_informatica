@@ -66,11 +66,13 @@ class DataBase:
                     'quantity1': row[7],
                     'quantity2': row[8],
                     'quantity3': row[9],
-                    'time1': row[10],
-                    'start': row[11],
-                    'end': row[12],
-                    'penalty_incurred': row[13],
-                    'estado': row[14]
+                    'falta_mesmo':row[10],
+                    'falta':row[11],
+                    'time1': row[12],
+                    'start': row[13],
+                    'end': row[14],
+                    'penalty_incurred': row[15],
+                    'estado': row[16]
                 }
             except ValueError:
                 print("error while fetching data")
@@ -86,6 +88,7 @@ class DataBase:
         try:
             for (name, value) in data.items():
                 __columns.append(name)
+            print(data[__columns[10]])
         except ValueError:
             print('Error passing data dictionary')
             return 1
@@ -96,17 +99,23 @@ class DataBase:
             for i in range(__columns.__len__()):
                 if i == __columns.__len__()-1:
                     __query_columns += ('`' + __columns[i] + '`')
-                    if __columns[i] in ('from', 'to', 'piece', 'type', 'destination'):
+                    if __columns[i] in ('from', 'to', 'piece', 'type', 'destination','falta_mesmo','falta'):
                         __query_values += ("'" + data[__columns[i]] + "'")
+                        print(__query_values)
                     else:
                         __query_values += (str(data[__columns[i]]))
+                        print(__query_values)
                 else:
                     __query_columns += ('`' + __columns[i] + '`, ')
-                    if __columns[i] in ('from', 'to', 'piece', 'type', 'destination'):
+                    if __columns[i] in ('from', 'to', 'piece', 'type', 'destination','falta_mesmo','falta'):
                         __query_values += ("'" + data[__columns[i]] + "', ")
+                        print(__query_values)
                     else:
                         __query_values += (str(data[__columns[i]]) + ", ")
+                        print(__query_values)
+            print(__query_columns)
             __query = __query % (__query_columns, __query_values)
+            print('entrou aquuiii!')
             print(__query)
             try:
                 cursor.execute(__query)
@@ -135,7 +144,7 @@ class DataBase:
         if table == 'transform' or table == 'unload' or table == 'unload_plc':
             for i in range(__columns.__len__()):
                 if __columns[i] != 'nnn' and __columns[i] != 'piece':
-                    if __columns[i] in ('from', 'to', 'type', 'destination'):
+                    if __columns[i] in ('from', 'to', 'type', 'destination','falta_mesmo','falta'):
                         __query += "`" + __columns[i] + "` = '" + data[__columns[i]] + "'"
                     else:
                         __query += "`" + __columns[i] + "` = " + str(data[__columns[i]])
@@ -270,6 +279,8 @@ def main():
         'quantity1': 0,
         'quantity2': 0,
         'quantity3': 0,
+        'falta_mesmo':'[11,12,13,14,15,16,17,18]',
+        'falta':'[30,21,22,23,24,25,26,27]',
         'time1': 0,
         'start': 0,
         'end': 0,
@@ -303,8 +314,9 @@ def main():
     print(db.insert_incr(dt))
     """
     #db.insert_order_db('unload', info2)
-    #orders = db.request_orders_db('transform')
-    #db.update_order_db("unload_plc", info2)
+    orders = db.request_orders_db()
+    print (orders)
+    #db.update_order_db("transform", info)
     #db.clear_db_tables()
     # tools_pret=[4,5,2,3,1,2,3,7]
     # db.tools_change(tools_pret)
