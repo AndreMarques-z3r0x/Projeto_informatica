@@ -234,8 +234,11 @@ class com_erp:
             print("data= ",str(msg,'utf-8'))
             return str(msg,'utf-8'),addr
     def send_msg_udp(self,msg,addr):
+        self.server = socket(AF_INET, SOCK_DGRAM)
+        self.server.bind(("0.0.0.0",self.PORT))   
         msg=msg.encode('utf-8')
         self.server.sendto(msg,addr)
+        self.server.close()
     def parse_info(self,msg,addr):
         mensagem=ET.fromstring(msg)
 
@@ -648,9 +651,6 @@ class manager:
                 for k in range(len(m)):
                     lista_ordens_correntes.insert(k,m[k])
         return 0
-
-
-
     def check_order_finish(self,dif):
         for pedido in lista_ordens_correntes:
             for s in range(1,9):
@@ -661,7 +661,6 @@ class manager:
                         if pedido.falta_mesmo[s]<0:
                             dif[s]=pedido.falta_mesmo[s]*(-1)
                             pedido.falta_mesmo[s]=0
-
     def ver_maquinas(self):
         b1=0
         b2=0
@@ -856,7 +855,7 @@ class manager:
                 lista_ordens_correntes[j].atualizar()
                 lista_ordens_feitas.append(lista_ordens_correntes.pop(j))
             j=j+1
-        for ord in lista_descargas_correntes:
+        for ord in lista_ordens_correntes:
             ord.atualizar()
 
         with open('transf2.txt','w') as fd:

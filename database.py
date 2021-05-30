@@ -88,7 +88,6 @@ class DataBase:
         try:
             for (name, value) in data.items():
                 __columns.append(name)
-            print(data[__columns[10]])
         except ValueError:
             print('Error passing data dictionary')
             return 1
@@ -338,8 +337,9 @@ def main():
     print(db.insert_incr(dt))
     """
     #db.insert_order_db('unload', info2)
-    orders = db.request_orders_db()
-    print (orders)
+    #orders = db.request_orders_db()
+    unloads = db.request_unloads_db()
+    print (unloads)
     #db.update_order_db("transform", info)
     #db.clear_db_tables()
     # tools_pret=[4,5,2,3,1,2,3,7]
